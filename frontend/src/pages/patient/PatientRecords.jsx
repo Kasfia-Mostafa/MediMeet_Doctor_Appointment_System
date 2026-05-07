@@ -18,7 +18,7 @@ export default function PatientRecords() {
     fetch();
   }, [typeFilter]);
 
-  const types = ['all', 'prescription', 'lab-result', 'diagnosis', 'other'];
+  const types = ['all', 'prescription', 'lab-result'];
 
   return (
     <div className="fade-in">
@@ -40,8 +40,7 @@ export default function PatientRecords() {
               </div>
               <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>{r.title}</h4>
               {r.description && <p style={{ fontSize: '14px', marginBottom: '8px' }}>{r.description}</p>}
-              {r.diagnosis && <div style={{ fontSize: '14px', marginBottom: '8px' }}><strong>Diagnosis:</strong> {r.diagnosis}</div>}
-              <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>By Dr. {r.doctor?.name}</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>By {r.doctor?.name}</div>
               {r.vitals && Object.keys(r.vitals).some(k => r.vitals[k]) && (
                 <div style={{ marginTop: '12px', padding: '12px', background: 'var(--surface-container-low)', borderRadius: 'var(--radius)', fontSize: '13px' }}>
                   <strong>Vitals:</strong>
@@ -49,6 +48,25 @@ export default function PatientRecords() {
                     {r.vitals.bloodPressure && <span>BP: {r.vitals.bloodPressure}</span>}
                     {r.vitals.heartRate && <span>HR: {r.vitals.heartRate} bpm</span>}
                     {r.vitals.temperature && <span>Temp: {r.vitals.temperature}°F</span>}
+                  </div>
+                </div>
+              )}
+              {r.files && r.files.length > 0 && (
+                <div style={{ marginTop: '12px' }}>
+                  <strong style={{ fontSize: '13px' }}>Files:</strong>
+                  <div className="flex flex-col gap-sm mt-sm">
+                    {r.files.map((file, idx) => (
+                      <a
+                        key={idx}
+                        href={file.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-sm"
+                        style={{ padding: '8px', background: 'var(--surface-container-low)', borderRadius: 'var(--radius)', textDecoration: 'none', color: 'var(--primary)', fontSize: '13px', fontWeight: 500 }}
+                      >
+                        <HiOutlineDocumentText size={16} /> {file.name || `File ${idx + 1}`}
+                      </a>
+                    ))}
                   </div>
                 </div>
               )}

@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
 import { useAuth } from '../../hooks/useAuth';
-import { 
-  HiOutlineUserGroup, HiOutlineCalendar, HiOutlineClipboardList, 
+import {
+  HiOutlineUserGroup, HiOutlineCalendar, HiOutlineClipboardList,
   HiOutlineArrowRight, HiOutlineClock, HiOutlineShieldCheck,
   HiOutlineTrendingUp, HiOutlineBell, HiOutlineUserCircle,
-  HiOutlineChatAlt2, HiOutlineCurrencyBangladeshi
+  HiOutlineChatAlt2, HiOutlineCurrencyBangladeshi, HiOutlinePaperClip
 } from 'react-icons/hi';
 
 export default function DoctorDashboard() {
@@ -19,7 +19,7 @@ export default function DoctorDashboard() {
       try {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         const [apptRes, patientsRes] = await Promise.all([
           API.get('/appointments', { params: { limit: 10 } }),
           API.get('/doctors/patients'),
@@ -52,8 +52,8 @@ export default function DoctorDashboard() {
         upcoming: prev.upcoming.map(a => a._id === id ? { ...a, status } : a)
       }));
       toast.success('Status updated');
-    } catch { 
-      toast.error('Update failed'); 
+    } catch {
+      toast.error('Update failed');
     }
   };
 
@@ -73,30 +73,23 @@ export default function DoctorDashboard() {
             {user?.avatar ? <img src={user.avatar} alt="" /> : user?.name?.charAt(0)}
           </div>
           <div>
-            <h2 style={{ fontSize: '26px', fontWeight: 800 }}>Good morning, Dr. {user?.name?.split(' ')[0]}</h2>
+            <h2 style={{ fontSize: '26px', fontWeight: 800 }}>Welcome,{user?.name}</h2>
             <p style={{ color: 'var(--text-muted)' }}>{doctorProfile?.specialization || 'Medical Specialist'} • {new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}</p>
           </div>
         </div>
-        <div className="flex gap-sm">
-          <button className="btn btn-ghost" style={{ width: '44px', height: '44px', padding: 0, borderRadius: '12px', background: 'white' }}>
-            <HiOutlineBell style={{ fontSize: '20px' }} />
-          </button>
-        </div>
+
       </div>
 
       <div className="grid grid-3 mb-xl">
         {metricCards.map((card, idx) => (
           <div key={idx} className="card" style={{ padding: '24px', border: 'none', boxShadow: 'var(--shadow-sm)' }}>
             <div className="flex items-center justify-between mb-md">
-              <div style={{ 
-                width: '48px', height: '48px', borderRadius: '14px', 
+              <div style={{
+                width: '48px', height: '48px', borderRadius: '14px',
                 backgroundColor: card.bg, color: card.color,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px'
               }}>
                 {card.icon}
-              </div>
-              <div className="chip chip-completed" style={{ fontSize: '10px', height: '22px', background: 'rgba(46, 125, 50, 0.1)', color: 'var(--success)' }}>
-                <HiOutlineTrendingUp style={{ marginRight: '4px' }} /> Live
               </div>
             </div>
             <div>
@@ -135,11 +128,16 @@ export default function DoctorDashboard() {
                       <div className="flex items-center gap-xs" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                         <HiOutlineClock /> {appt.timeSlot} • {new Date(appt.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                       </div>
+                      {appt.medicalFiles?.length > 0 && (
+                        <div className="flex items-center gap-xs mt-xs" style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 500 }}>
+                          <HiOutlinePaperClip /> {appt.medicalFiles.length} File(s)
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-md">
-                    <select 
-                      className={`chip chip-${appt.status}`} 
+                    <select
+                      className={`chip chip-${appt.status}`}
                       style={{ border: 'none', cursor: 'pointer', outline: 'none', appearance: 'none', textAlign: 'center', fontSize: '11px' }}
                       value={appt.status}
                       onChange={(e) => handleUpdateStatus(appt._id, e.target.value)}
@@ -176,14 +174,6 @@ export default function DoctorDashboard() {
                 <HiOutlineUserCircle /> Edit Profile
               </Link>
             </div>
-          </div>
-
-          <div className="card" style={{ padding: '24px', background: 'linear-gradient(135deg, var(--primary), var(--primary-light))', color: 'white', border: 'none' }}>
-            <h4 style={{ color: 'white', opacity: 0.8, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Quick Insight</h4>
-            <p style={{ margin: '12px 0 20px', fontSize: '15px', fontWeight: 500, lineHeight: 1.5 }}>
-              Your patient volume has increased by <strong style={{ textDecoration: 'underline' }}>14%</strong> this week. Make sure to update your schedule.
-            </p>
-            <button className="btn btn-sm" style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', fontWeight: 600 }}>Update Now</button>
           </div>
         </div>
       </div>

@@ -147,7 +147,7 @@ export default function FindDoctor() {
                         <HiOutlineStar />
                         <span>4.9</span>
                       </div>
-                      <h3>Dr. {doc.user?.name}</h3>
+                      <h3>{doc.user?.name}</h3>
                       <div className="fd-card-spec">{doc.specialization}</div>
                     </div>
                   </div>

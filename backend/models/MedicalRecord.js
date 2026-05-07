@@ -12,7 +12,6 @@ const medicalRecordSchema = new mongoose.Schema(
     },
     title: { type: String, required: true },
     description: { type: String, default: '' },
-    diagnosis: { type: String, default: '' },
     medications: [
       {
         name: { type: String },

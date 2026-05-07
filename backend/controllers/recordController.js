@@ -63,4 +63,62 @@ const getRecord = async (req, res, next) => {
   }
 };
 
-module.exports = { getRecords, createRecord, getRecord };
+// @desc    Update record
+// @route   PUT /api/records/:id
+const updateRecord = async (req, res, next) => {
+  try {
+    const { title, type, description, diagnosis } = req.body;
+    let record = await MedicalRecord.findById(req.params.id);
+
+    if (!record) {
+      res.status(404);
+      throw new Error('Record not found');
+    }
+
+    // Only doctor who created it can update
+    if (record.doctor.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      res.status(401);
+      throw new Error('Not authorized to update this record');
+    }
+
+    record.title = title || record.title;
+    record.type = type || record.type;
+    record.description = description || record.description;
+    if (diagnosis !== undefined) record.diagnosis = diagnosis;
+
+    if (req.files && req.files.length > 0) {
+      const newFiles = req.files.map((f) => ({ url: f.path, publicId: f.filename, name: f.originalname, type: f.mimetype }));
+      record.files = [...record.files, ...newFiles];
+    }
+
+    const updatedRecord = await record.save();
+    res.json(updatedRecord);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete record
+// @route   DELETE /api/records/:id
+const deleteRecord = async (req, res, next) => {
+  try {
+    const record = await MedicalRecord.findById(req.params.id);
+
+    if (!record) {
+      res.status(404);
+      throw new Error('Record not found');
+    }
+
+    if (record.doctor.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      res.status(401);
+      throw new Error('Not authorized to delete this record');
+    }
+
+    await record.deleteOne();
+    res.json({ message: 'Record removed' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getRecords, createRecord, getRecord, updateRecord, deleteRecord };

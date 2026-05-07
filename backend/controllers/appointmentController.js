@@ -18,7 +18,7 @@ const createAppointment = async (req, res, next) => {
 
     const [year, month, day] = date.split('-').map(Number);
     const bookingDate = new Date(Date.UTC(year, month - 1, day));
-    
+
     // 1. Check if the time slot is already booked for this doctor
     const doctorBooked = await Appointment.findOne({
       doctor, date: bookingDate, timeSlot, status: { $in: ['pending', 'confirmed'] },
@@ -168,8 +168,8 @@ const sendCancellationEmail = async (appointment, userRole) => {
     <div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
       <h2 style="color: #e11d48; border-bottom: 2px solid #e11d48; padding-bottom: 10px;">Cancellation Notice</h2>
       <p>Hello <strong>${populated.patient.name}</strong>,</p>
-      <p>Your appointment with <strong>Dr. ${populated.doctor.name}</strong> on <strong>${new Date(populated.date).toLocaleDateString()} at ${populated.timeSlot}</strong> has been cancelled.</p>
-      
+      <p>Your appointment with <strong>${populated.doctor.name}</strong> on <strong>${new Date(populated.date).toLocaleDateString()} at ${populated.timeSlot}</strong> has been cancelled.</p>
+
       <div style="background: #fff1f2; padding: 15px; border-radius: 8px; border-left: 4px solid #e11d48; margin: 20px 0;">
         <h4 style="margin: 0 0 10px 0; color: #9f1239;">Important Information:</h4>
         <ul style="padding-left: 20px; margin: 0;">
@@ -177,9 +177,9 @@ const sendCancellationEmail = async (appointment, userRole) => {
           <li>Otherwise, your <strong>refund</strong> will be processed and credited within <strong>2 business days</strong>.</li>
         </ul>
       </div>
-      
+
       <p>Reason for cancellation: <em>${populated.cancelReason || 'Administrative decision'}</em></p>
-      
+
       <p style="margin-top: 30px; font-size: 13px; color: #666;">This is an automated notification. Please do not reply.</p>
       <hr style="border: 0; border-top: 1px solid #eee;" />
       <p style="text-align: center; font-weight: bold; color: #0f172a;">MediMeet Healthcare</p>
@@ -212,7 +212,7 @@ const sendConfirmationEmail = async (appointment, userRole) => {
       <h2 style="color: #16a34a; border-bottom: 2px solid #16a34a; padding-bottom: 10px;">Appointment Confirmed</h2>
       <p>Hello <strong>${populated.patient.name}</strong>,</p>
       <p>Great news! Your appointment with <strong>Dr. ${populated.doctor.name}</strong> has been confirmed by the ${confirmedBy}.</p>
-      
+
       <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid #16a34a; margin: 20px 0;">
         <h4 style="margin: 0 0 10px 0; color: #166534;">Appointment Details:</h4>
         <ul style="padding: 0; list-style: none;">
@@ -221,9 +221,9 @@ const sendConfirmationEmail = async (appointment, userRole) => {
           <li><strong>Type:</strong> ${populated.type || 'General Consultation'}</li>
         </ul>
       </div>
-      
+
       <p>Please arrive 10 minutes before your scheduled time. If you need to reschedule or have any questions, please contact us through the portal.</p>
-      
+
       <p style="margin-top: 30px; font-size: 13px; color: #666;">This is an automated notification. Please do not reply.</p>
       <hr style="border: 0; border-top: 1px solid #eee;" />
       <p style="text-align: center; font-weight: bold; color: #0f172a;">MediMeet Healthcare</p>
@@ -274,6 +274,52 @@ const updateAppointment = async (req, res, next) => {
   }
 };
 
+// @desc    Reschedule appointment
+// @route   PUT /api/appointments/:id/reschedule
+const rescheduleAppointment = async (req, res, next) => {
+  try {
+    const { date, timeSlot } = req.body;
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      res.status(404);
+      throw new Error('Appointment not found');
+    }
+
+    if (!date || !timeSlot) {
+      res.status(400);
+      throw new Error('Please provide new date and time slot');
+    }
+
+    const [year, month, day] = date.split('-').map(Number);
+    const bookingDate = new Date(Date.UTC(year, month - 1, day));
+
+    // Conflict check
+    const conflict = await Appointment.findOne({
+      doctor: appointment.doctor,
+      date: bookingDate,
+      timeSlot,
+      status: { $in: ['pending', 'confirmed'] },
+      _id: { $ne: appointment._id }
+    });
+
+    if (conflict) {
+      res.status(400);
+      throw new Error('The selected slot is already booked');
+    }
+
+    appointment.date = bookingDate;
+    appointment.timeSlot = timeSlot;
+    appointment.status = 'pending'; // Reset to pending for doctor re-approval
+
+    await appointment.save();
+
+    res.json(appointment);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Cancel appointment
 // @route   DELETE /api/appointments/:id
 const cancelAppointment = async (req, res, next) => {
@@ -296,4 +342,4 @@ const cancelAppointment = async (req, res, next) => {
   }
 };
 
-module.exports = { createAppointment, getAppointments, getAppointment, updateAppointment, cancelAppointment };
+module.exports = { createAppointment, getAppointments, getAppointment, updateAppointment, cancelAppointment, rescheduleAppointment };

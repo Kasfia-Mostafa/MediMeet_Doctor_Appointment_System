@@ -6,6 +6,7 @@ const {
   getAppointment,
   updateAppointment,
   cancelAppointment,
+  rescheduleAppointment,
 } = require('../controllers/appointmentController');
 const protect = require('../middleware/auth');
 const uploadMedicalFiles = require('../middleware/uploadMedicalFiles');
@@ -26,6 +27,7 @@ router.post('/', (req, res, next) => {
 router.get('/', getAppointments);
 router.get('/:id', getAppointment);
 router.put('/:id', updateAppointment);
+router.put('/:id/reschedule', rescheduleAppointment);
 router.delete('/:id', cancelAppointment);
 
 module.exports = router;

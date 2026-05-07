@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
-import { HiOutlineCalendar, HiOutlineFilter, HiOutlineSearch, HiOutlineClock, HiOutlineTrendingUp } from 'react-icons/hi';
+import { HiOutlineCalendar, HiOutlineFilter, HiOutlineSearch, HiOutlineClock, HiOutlineTrendingUp, HiOutlinePaperClip } from 'react-icons/hi';
 
 export default function DoctorAppointments() {
   const [appointments, setAppointments] = useState([]);
@@ -170,7 +170,7 @@ export default function DoctorAppointments() {
               <tr>
                 <th>Patient</th>
                 <th>Date & Time</th>
-                <th>Reason</th>
+                <th>Reason & Files</th>
                 <th>Status</th>
                 <th>Payment</th>
                 <th>Action</th>
@@ -189,7 +189,18 @@ export default function DoctorAppointments() {
                     <div style={{ fontWeight: 500 }}>{new Date(a.date).toLocaleDateString()}</div>
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}><HiOutlineClock style={{ display: 'inline', marginRight: '4px' }} />{a.timeSlot}</div>
                   </td>
-                  <td style={{ fontSize: '13px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.reason}</td>
+                  <td style={{ fontSize: '13px', maxWidth: '200px' }}>
+                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.reason}</div>
+                    {a.medicalFiles?.length > 0 && (
+                      <div className="flex gap-xs mt-xs flex-wrap">
+                        {a.medicalFiles.map((file, idx) => (
+                          <a key={idx} href={file.url} target="_blank" rel="noreferrer" className="chip" style={{ fontSize: '10px', background: 'var(--surface-container-high)', color: 'var(--primary)', textDecoration: 'none', padding: '2px 6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <HiOutlinePaperClip /> File {idx+1}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </td>
                   <td>
                     <select 
                       className={`chip chip-${a.status}`} 
