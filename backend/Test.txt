@@ -1,0 +1,18 @@
+user1: kasfiasworna@gmail.com
+user1_password: kasfiasworna@gmail.com
+
+user2: ayesha.siddiqua.bd@gmail.com
+user2_password: ayesha.siddiqua.bd@gmail.com
+
+admin1: kasfiamostafa03@gmail.com
+admin1_password: kasfiamostafa03@gmail.com
+
+admin2: shamim.osman.bd@gmail.com
+admin2_password: shamim.osman.bd@gmail.com
+
+doctor: mamun.uro@example.commamun.uro@example.com
+doctor_password: mamun.uro@example.com
+
+Mastercard: 5555 5555 5555 4444
+CVC: 111
+04/28
