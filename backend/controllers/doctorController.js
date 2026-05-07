@@ -6,7 +6,7 @@ const Appointment = require('../models/Appointment');
 // @route   GET /api/doctors
 const getDoctors = async (req, res, next) => {
   try {
-    const { specialization, search, page = 1, limit = 12 } = req.query;
+    const { specialization, search, page = 1, limit = 100 } = req.query;
     let query = { isAvailable: true };
 
     // 1. Specialization Filter (Base Filter)

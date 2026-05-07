@@ -52,8 +52,7 @@ export default function Navbar() {
             </div>
           ) : (
             <>
-              <Link to="/signin" className="btn btn-sm btn-secondary">Sign In</Link>
-              <Link to="/signup" className="btn btn-sm btn-primary">Sign Up</Link>
+              <Link to="/signup" className="btn btn-sm btn-primary">Create Account</Link>
             </>
           )}
           <button className="mobile-menu-btn" onClick={() => setMobileOpen(!mobileOpen)}>

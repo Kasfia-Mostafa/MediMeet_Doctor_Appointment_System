@@ -3,6 +3,16 @@ import API from '../../api/axios';
 import toast from 'react-hot-toast';
 import { HiOutlineCalendar, HiOutlineFilter, HiOutlineSearch } from 'react-icons/hi';
 
+const formatTime12h = (time24) => {
+  if (!time24 || typeof time24 !== 'string') return '';
+  const [hourStr, minute] = time24.split(':');
+  if (!hourStr || !minute) return time24;
+  let hour = parseInt(hourStr, 10);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  hour = hour % 12 || 12;
+  return `${hour}:${minute} ${ampm}`;
+};
+
 export default function AdminAppointments() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +24,9 @@ export default function AdminAppointments() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const params = filter !== 'all' ? { status: filter } : {};
+        let statusParam = filter;
+        if (filter === 'expired') statusParam = 'no-show';
+        const params = statusParam !== 'all' ? { status: statusParam } : {};
         const { data } = await API.get('/appointments', { params });
         setAppointments(data.appointments || []);
       } catch (err) {
@@ -60,7 +72,7 @@ export default function AdminAppointments() {
     a.reason?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const tabs = ['all', 'pending', 'confirmed', 'completed', 'cancelled'];
+  const tabs = ['all', 'pending', 'confirmed', 'completed', 'cancelled', 'expired'];
 
   return (
     <div className="fade-in">
@@ -142,18 +154,18 @@ export default function AdminAppointments() {
                   </td>
                   <td>
                     <div style={{ fontWeight: 500 }}>{new Date(a.date).toLocaleDateString()}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{a.timeSlot}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{formatTime12h(a.timeSlot)}</div>
                   </td>
                   <td><span style={{ textTransform: 'capitalize' }}>{a.type}</span></td>
                   <td>
                     <select
-                      className={`chip chip-${a.status}`}
+                      className={`chip chip-${a.status === 'no-show' ? 'expired' : a.status}`}
                       style={{ border: 'none', cursor: 'pointer', outline: 'none', appearance: 'none', textAlign: 'center' }}
                       value={a.status}
                       onChange={(e) => handleUpdateStatus(a._id, e.target.value)}
                     >
-                      {tabs.slice(1).map(s => (
-                        <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                      {['pending', 'confirmed', 'completed', 'cancelled', 'no-show'].map(s => (
+                        <option key={s} value={s}>{s === 'no-show' ? 'Expired' : s.charAt(0).toUpperCase() + s.slice(1)}</option>
                       ))}
                     </select>
                   </td>

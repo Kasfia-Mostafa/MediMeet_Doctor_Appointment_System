@@ -211,7 +211,8 @@ const sendConfirmationEmail = async (appointment, userRole) => {
     <div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
       <h2 style="color: #16a34a; border-bottom: 2px solid #16a34a; padding-bottom: 10px;">Appointment Confirmed</h2>
       <p>Hello <strong>${populated.patient.name}</strong>,</p>
-      <p>Great news! Your appointment with <strong>Dr. ${populated.doctor.name}</strong> has been confirmed by the ${confirmedBy}.</p>
+      <p>Great news! Your appointment with <strong>
+      ${populated.doctor.name}</strong> has been confirmed by the ${confirmedBy}.</p>
 
       <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid #16a34a; margin: 20px 0;">
         <h4 style="margin: 0 0 10px 0; color: #166534;">Appointment Details:</h4>

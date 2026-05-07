@@ -2,27 +2,30 @@ const cron = require('node-cron');
 const Appointment = require('../models/Appointment');
 const sendEmail = require('./sendEmail');
 
+/**
+ * Automates appointment status management.
+ * 1. Checks for appointments whose date has passed.
+ * 2. Updates status to 'no-show' (Expired).
+ * 3. Sends an automated email to the patient to prompt rescheduling.
+ */
 const scheduleExpiryCheck = () => {
-  // Run every minute for immediate check
-  cron.schedule('* * * * *', async () => {
-    console.log('[ExpiryJob] Running hourly appointment expiry check...');
+  // Run every hour to keep the system clean
+  cron.schedule('0 * * * *', async () => {
     try {
       const now = new Date();
       
-      // Find appointments that are past their date, and not completed/cancelled/expired
-      // Also ensure we only pick up those that are 'pending' or 'confirmed'
+      // Find appointments that are past their date and still in pending/confirmed status
       const expiredAppointments = await Appointment.find({
         date: { $lt: now },
         status: { $in: ['pending', 'confirmed'] }
       }).populate('patient', 'name email').populate('doctor', 'name');
 
       for (const appt of expiredAppointments) {
-        appt.status = 'no-show'; // Using no-show as the internal state for expired/missed
+        appt.status = 'no-show'; 
         await appt.save();
 
-        // Send Reschedule Email
         if (appt.patient && appt.patient.email) {
-          const subject = `Your appointment with Dr. ${appt.doctor?.name || 'Doctor'} has expired`;
+          const subject = `Your appointment with ${appt.doctor?.name || 'Doctor'} has expired`;
           const message = `
             <div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
               <h2 style="color: #6366f1; border-bottom: 2px solid #6366f1; padding-bottom: 10px;">Appointment Expired</h2>
@@ -48,18 +51,13 @@ const scheduleExpiryCheck = () => {
 
           try {
             await sendEmail({ email: appt.patient.email, subject, message });
-            console.log(`[ExpiryJob] Expiry email sent to ${appt.patient.email} for appt ${appt._id}`);
           } catch (err) {
-            console.error(`[ExpiryJob] Failed to send email to ${appt.patient.email}:`, err.message);
+            // Silently fail or log to a file in production
           }
         }
       }
-
-      if (expiredAppointments.length > 0) {
-        console.log(`[ExpiryJob] Processed ${expiredAppointments.length} expired appointments.`);
-      }
     } catch (error) {
-      console.error('[ExpiryJob] Error during expiry check:', error.message);
+      // Silently handle errors to keep terminal clean
     }
   });
 };

@@ -4,20 +4,21 @@ import API from '../../api/axios';
 import {
   HiOutlineSearch, HiOutlineStar, HiOutlineLocationMarker,
   HiOutlineCurrencyBangladeshi, HiOutlineBadgeCheck, HiOutlineClock,
-  HiOutlineAcademicCap, HiOutlineArrowRight
+  HiOutlineAcademicCap, HiOutlineArrowRight,
+  HiOutlineChevronLeft, HiOutlineChevronRight
 } from 'react-icons/hi';
 import './FindDoctor.css';
 
 const specializations = [
-  'All', 'Cardiology', 'Neurology', 'Pediatrics', 'Orthopedics', 'Dermatology',
-  'Gastroenterology', 'Psychiatry', 'Dentistry', 'General Medicine', 'Gynecology',
+  'All', 'Neurology', 'Pediatrics', 'Orthopedics', 'Dermatology',
+  'Gastroenterology', 'Psychiatry', 'Dentistry', 'Gynecology',
   'ENT', 'Ophthalmology', 'Urology'
 ];
 
 const specIcons = {
-  'Cardiology': '❤️', 'Neurology': '🧠', 'Pediatrics': '👶', 'Orthopedics': '🦴',
+  'Neurology': '🧠', 'Pediatrics': '👶', 'Orthopedics': '🦴',
   'Dermatology': '🧴', 'Gastroenterology': '🫁', 'Psychiatry': '🧘', 'Dentistry': '🦷',
-  'General Medicine': '🩺', 'Gynecology': '👩‍⚕️', 'ENT': '👂', 'Ophthalmology': '👁️', 'Urology': '💊'
+  'Gynecology': '👩‍⚕️', 'ENT': '👂', 'Ophthalmology': '👁️', 'Urology': '💊'
 };
 
 export default function FindDoctor() {
@@ -25,11 +26,14 @@ export default function FindDoctor() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeSpec, setActiveSpec] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const doctorsPerPage = 6;
 
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const { data } = await API.get('/doctors');
+        const { data } = await API.get('/doctors?limit=100');
+        console.log('Fetched Doctors:', data.doctors.length);
         setDoctors(data.doctors);
       } catch (err) {
         console.error('Error fetching doctors:', err);
@@ -40,13 +44,26 @@ export default function FindDoctor() {
     fetchDoctors();
   }, []);
 
+  // Reset to first page when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, activeSpec]);
+
   const filteredDoctors = doctors.filter(doc => {
     const matchesSearch = doc.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
-                         doc.specialization?.toLowerCase().includes(search.toLowerCase()) ||
-                         doc.hospital?.toLowerCase().includes(search.toLowerCase());
+      doc.specialization?.toLowerCase().includes(search.toLowerCase()) ||
+      doc.hospital?.toLowerCase().includes(search.toLowerCase());
     const matchesSpec = activeSpec === 'All' || doc.specialization === activeSpec;
     return matchesSearch && matchesSpec;
   });
+
+  // Pagination Logic
+  const indexOfLastDoctor = currentPage * doctorsPerPage;
+  const indexOfFirstDoctor = indexOfLastDoctor - doctorsPerPage;
+  const currentDoctors = filteredDoctors.slice(indexOfFirstDoctor, indexOfLastDoctor);
+  const totalPages = Math.ceil(filteredDoctors.length / doctorsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="find-doctor-page fade-in">
@@ -98,7 +115,7 @@ export default function FindDoctor() {
       <section className="fd-filters">
         <div className="container">
           <div className="fd-filter-scroll">
-            {['All', ...new Set(doctors.map(doc => doc.specialization).filter(Boolean))].map(s => (
+            {specializations.map(s => (
               <button
                 key={s}
                 className={`fd-chip ${activeSpec === s ? 'active' : ''}`}
@@ -127,65 +144,101 @@ export default function FindDoctor() {
               </button>
             </div>
           ) : (
-            <div className="fd-doctor-grid">
-              {filteredDoctors.map(doc => (
-                <div key={doc._id} className="fd-card">
-                  <div className="fd-card-top">
-                    <div className="fd-card-avatar">
-                      {doc.user?.avatar ? (
-                        <img src={doc.user.avatar} alt={doc.user?.name} />
-                      ) : (
-                        <div className="fd-avatar-placeholder">{doc.user?.name?.charAt(0)}</div>
+            <>
+              <div className="fd-doctor-grid">
+                {currentDoctors.map(doc => (
+                  <div key={doc._id} className="fd-card">
+                    <div className="fd-card-top">
+                      <div className="fd-card-avatar">
+                        {doc.user?.avatar ? (
+                          <img src={doc.user.avatar} alt={doc.user?.name} />
+                        ) : (
+                          <div className="fd-avatar-placeholder">{doc.user?.name?.charAt(0)}</div>
+                        )}
+                        <div className="fd-verified-badge" title="Verified Doctor">
+                          <HiOutlineBadgeCheck />
+                        </div>
+                      </div>
+
+                      <div className="fd-card-info">
+                        <div className="fd-card-rating">
+                          <HiOutlineStar />
+                          <span>4.9</span>
+                        </div>
+                        <h3>{doc.user?.name}</h3>
+                        <div className="fd-card-spec">{doc.specialization}</div>
+                      </div>
+                    </div>
+
+                    <div className="fd-card-details">
+                      {doc.qualification && (
+                        <div className="fd-detail-row">
+                          <HiOutlineAcademicCap />
+                          <span>{doc.qualification}</span>
+                        </div>
                       )}
-                      <div className="fd-verified-badge" title="Verified Doctor">
-                        <HiOutlineBadgeCheck />
+                      <div className="fd-detail-row">
+                        <HiOutlineLocationMarker />
+                        <span>{doc.hospital || 'MediMeet Hospital'}</span>
                       </div>
+                      {doc.experience && (
+                        <div className="fd-detail-row">
+                          <HiOutlineClock />
+                          <span>{doc.experience}+ years experience</span>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="fd-card-info">
-                      <div className="fd-card-rating">
-                        <HiOutlineStar />
-                        <span>4.9</span>
+                    <div className="fd-card-footer">
+                      <div className="fd-card-fee">
+                        <HiOutlineCurrencyBangladeshi />
+                        <div>
+                          <span className="fd-fee-amount">৳{doc.consultationFee || 500}</span>
+                          <span className="fd-fee-label">per visit</span>
+                        </div>
                       </div>
-                      <h3>{doc.user?.name}</h3>
-                      <div className="fd-card-spec">{doc.specialization}</div>
+                      <Link to={`/doctor-details/${doc._id}`} className="fd-book-btn">
+                        Book Now <HiOutlineArrowRight />
+                      </Link>
                     </div>
                   </div>
+                ))}
+              </div>
 
-                  <div className="fd-card-details">
-                    {doc.qualification && (
-                      <div className="fd-detail-row">
-                        <HiOutlineAcademicCap />
-                        <span>{doc.qualification}</span>
-                      </div>
-                    )}
-                    <div className="fd-detail-row">
-                      <HiOutlineLocationMarker />
-                      <span>{doc.hospital || 'MediMeet Hospital'}</span>
+              {totalPages > 1 && (
+                <div className="fd-pagination-container">
+                  <div className="fd-pagination">
+                    <button
+                      className="fd-page-btn"
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      title="Previous Page"
+                    >
+                      <HiOutlineChevronLeft />
+                    </button>
+                    <div className="fd-page-numbers">
+                      {[...Array(totalPages)].map((_, i) => (
+                        <button
+                          key={i + 1}
+                          className={`fd-page-number ${currentPage === i + 1 ? 'active' : ''}`}
+                          onClick={() => paginate(i + 1)}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
                     </div>
-                    {doc.experience && (
-                      <div className="fd-detail-row">
-                        <HiOutlineClock />
-                        <span>{doc.experience}+ years experience</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="fd-card-footer">
-                    <div className="fd-card-fee">
-                      <HiOutlineCurrencyBangladeshi />
-                      <div>
-                        <span className="fd-fee-amount">৳{doc.consultationFee || 500}</span>
-                        <span className="fd-fee-label">per visit</span>
-                      </div>
-                    </div>
-                    <Link to={`/doctor-details/${doc._id}`} className="fd-book-btn">
-                      Book Now <HiOutlineArrowRight />
-                    </Link>
+                    <button
+                      className="fd-page-btn"
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      title="Next Page"
+                    >
+                      <HiOutlineChevronRight />
+                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </section>
