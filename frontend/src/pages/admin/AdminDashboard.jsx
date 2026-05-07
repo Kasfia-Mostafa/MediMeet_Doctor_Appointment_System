@@ -15,8 +15,8 @@ export default function AdminDashboard() {
       setStats(data);
     } catch (err) {
       toast.error('Failed to load dashboard statistics. Please try again.');
-    } finally { 
-      setLoading(false); 
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,8 +80,7 @@ export default function AdminDashboard() {
             <Link to="/admin/appointments" className="btn btn-primary btn-block" style={{justifyContent:'flex-start'}}><HiOutlineCalendar /> Manage Appointments</Link>
             <Link to="/admin/add-doctor" className="btn btn-secondary btn-block" style={{justifyContent:'flex-start'}}><HiOutlineUserAdd /> Add New Doctor</Link>
             <Link to="/admin/doctors" className="btn btn-secondary btn-block" style={{justifyContent:'flex-start'}}><HiOutlineUserGroup /> Manage Doctors</Link>
-            <Link to="/admin/inventory" className="btn btn-secondary btn-block" style={{justifyContent:'flex-start'}}><HiOutlineCube /> Inventory Management</Link>
-            <Link to="/admin/analytics" className="btn btn-secondary btn-block" style={{justifyContent:'flex-start'}}><HiOutlineCurrencyBangladeshi /> Financial Analytics</Link>
+            <Link to="/admin/analytics" className="btn btn-secondary btn-block" style={{justifyContent:'flex-start'}}><HiOutlineCurrencyBangladeshi /> System Analytics</Link>
           </div>
         </div>
       </div>

@@ -150,9 +150,7 @@
 .fd-filters {
   padding: 28px 0 0;
   background: var(--background);
-  position: sticky;
-  top: 64px;
-  z-index: 10;
+  position: relative;
   border-bottom: 1px solid var(--outline-variant);
 }
 

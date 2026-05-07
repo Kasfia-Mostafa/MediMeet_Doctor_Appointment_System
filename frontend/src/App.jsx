@@ -58,7 +58,7 @@ function PublicLayout({ children }) {
   return (
     <>
       <Navbar />
-      <main style={{ minHeight: 'calc(100vh - 300px)' }}>{children}</main>
+      <main>{children}</main>
       <Footer />
     </>
   );
