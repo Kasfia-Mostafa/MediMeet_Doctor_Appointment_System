@@ -265,8 +265,23 @@ const updateUserRole = async (req, res, next) => {
 
 const getBlogs = async (req, res, next) => {
   try {
-    const blogs = await Blog.find().populate('author', 'name').sort({ createdAt: -1 });
-    res.json(blogs);
+    const { page = 1, limit = 6 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const blogs = await Blog.find()
+      .populate('author', 'name')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+      
+    const total = await Blog.countDocuments();
+    
+    res.json({
+      blogs,
+      total,
+      pages: Math.ceil(total / limit),
+      currentPage: parseInt(page)
+    });
   } catch (error) { next(error); }
 };
 
@@ -298,6 +313,31 @@ const deleteBlog = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
+const updateBlog = async (req, res, next) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) { res.status(404); throw new Error('Blog not found'); }
+
+    const { title, content, excerpt, category, isPublished } = req.body;
+    
+    if (title) {
+      blog.title = title;
+      blog.slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') + '-' + Date.now();
+    }
+    if (content) blog.content = content;
+    if (excerpt) blog.excerpt = excerpt;
+    if (category) blog.category = category;
+    if (isPublished !== undefined) blog.isPublished = isPublished === 'true' || isPublished === true;
+    
+    if (req.file) {
+      blog.coverImage = req.file.path;
+    }
+
+    await blog.save();
+    res.json(blog);
+  } catch (error) { next(error); }
+};
+
 module.exports = { 
   getDashboard, 
   getStaff, 
@@ -312,5 +352,6 @@ module.exports = {
   updateUserRole,
   getBlogs,
   createBlog,
-  deleteBlog
+  deleteBlog,
+  updateBlog
 };

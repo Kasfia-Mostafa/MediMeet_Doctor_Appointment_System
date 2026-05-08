@@ -4,7 +4,7 @@ const {
   getDashboard, getStaff, addStaff, updateStaff, deleteStaff, 
   getInventory, addInventory, updateInventory, getAnalytics,
   getUsers, updateUserRole,
-  getBlogs, createBlog, deleteBlog
+  getBlogs, createBlog, deleteBlog, updateBlog
 } = require('../controllers/adminController');
 const protect = require('../middleware/auth');
 const roleAuth = require('../middleware/roleAuth');
@@ -33,6 +33,7 @@ router.get('/analytics', getAnalytics);
 // Blog Management
 router.get('/blogs', getBlogs);
 router.post('/blogs', upload.single('coverImage'), createBlog);
+router.put('/blogs/:id', upload.single('coverImage'), updateBlog);
 router.delete('/blogs/:id', deleteBlog);
 
 module.exports = router;

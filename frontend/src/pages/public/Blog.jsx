@@ -10,12 +10,17 @@ export default function Blog() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const { data } = await API.get('/blogs');
+        setLoading(true);
+        const categoryParam = activeCategory === 'All' ? '' : `category=${activeCategory.toLowerCase()}`;
+        const { data } = await API.get(`/blogs?${categoryParam}&page=${page}&limit=9`);
         setBlogs(data.blogs);
+        setTotalPages(data.pages);
       } catch (err) {
         console.error('Error fetching blogs:', err);
       } finally {
@@ -23,11 +28,12 @@ export default function Blog() {
       }
     };
     fetchBlogs();
-  }, []);
+  }, [activeCategory, page]);
 
-  const filteredBlogs = activeCategory === 'All' 
-    ? blogs 
-    : blogs.filter(b => b.category?.toLowerCase() === activeCategory.toLowerCase());
+  const handleCategoryChange = (cat) => {
+    setActiveCategory(cat);
+    setPage(1);
+  };
 
   if (loading) return (
     <div className="loader">
@@ -54,7 +60,7 @@ export default function Blog() {
               <button 
                 key={cat} 
                 className={`blog-tab ${activeCategory === cat ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => handleCategoryChange(cat)}
               >
                 {cat === 'All' ? cat : cat.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </button>
@@ -66,45 +72,45 @@ export default function Blog() {
       {/* Blog Grid */}
       <section className="blog-grid-section">
         <div className="container">
-          {filteredBlogs.length === 0 ? (
+          {blogs.length === 0 ? (
             <div className="blog-empty">
               <div className="blog-empty-icon">📝</div>
               <h3>No articles found</h3>
               <p>We haven't published any articles in this category yet.</p>
-              <button className="btn btn-secondary" onClick={() => setActiveCategory('All')}>
+              <button className="btn btn-secondary" onClick={() => handleCategoryChange('All')}>
                 View All Articles
               </button>
             </div>
           ) : (
             <>
               {/* Featured Article (first one) */}
-              {activeCategory === 'All' && filteredBlogs.length > 0 && (
-                <Link to={`/blog/${filteredBlogs[0]._id}`} className="blog-featured">
-                  {filteredBlogs[0].coverImage && (
+              {activeCategory === 'All' && page === 1 && blogs.length > 0 && (
+                <Link to={`/blog/${blogs[0]._id}`} className="blog-featured">
+                  {blogs[0].coverImage && (
                     <div className="blog-featured-img">
-                      <img src={filteredBlogs[0].coverImage} alt={filteredBlogs[0].title} />
+                      <img src={blogs[0].coverImage} alt={blogs[0].title} />
                     </div>
                   )}
                   <div className="blog-featured-body">
                     <div className="blog-meta">
-                      <span className="blog-category-tag">{filteredBlogs[0].category.replace('-', ' ')}</span>
+                      <span className="blog-category-tag">{blogs[0].category.replace('-', ' ')}</span>
                       <span className="blog-date" style={{ marginRight: '8px' }}>
                         <HiOutlineUser />
-                        {filteredBlogs[0].author?.name || 'Medical Team'}
+                        {blogs[0].author?.name || 'Medical Team'}
                       </span>
                       <span className="blog-date">
                         <HiOutlineCalendar />
-                        {new Date(filteredBlogs[0].createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {new Date(blogs[0].createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                     </div>
-                    <h2>{filteredBlogs[0].title}</h2>
-                    <p>{filteredBlogs[0].excerpt || filteredBlogs[0].content?.substring(0, 200) + '...'}</p>
+                    <h2>{blogs[0].title}</h2>
+                    <p>{blogs[0].excerpt || blogs[0].content?.substring(0, 200) + '...'}</p>
                     <div className="blog-featured-footer">
                       <span className="blog-read-link">
                         Read Full Article <HiOutlineArrowRight />
                       </span>
                       <span className="blog-views">
-                        <HiOutlineEye /> {filteredBlogs[0].views || 0} views
+                        <HiOutlineEye /> {blogs[0].views || 0} views
                       </span>
                     </div>
                   </div>
@@ -113,7 +119,7 @@ export default function Blog() {
 
               {/* Article Grid */}
               <div className="blog-grid">
-                {(activeCategory === 'All' ? filteredBlogs.slice(1) : filteredBlogs).map(blog => (
+                {(activeCategory === 'All' && page === 1 ? blogs.slice(1) : blogs).map(blog => (
                   <Link to={`/blog/${blog._id}`} key={blog._id} className="blog-card">
                     {blog.coverImage && (
                       <div className="blog-card-img">
@@ -146,6 +152,34 @@ export default function Blog() {
                   </Link>
                 ))}
               </div>
+
+              {totalPages > 1 && (
+                <div className="pagination">
+                  <button 
+                    disabled={page === 1} 
+                    onClick={() => setPage(p => p - 1)}
+                    style={{ width: 'auto', padding: '0 16px' }}
+                  >
+                    Previous
+                  </button>
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button 
+                      key={i + 1} 
+                      className={page === i + 1 ? 'active' : ''} 
+                      onClick={() => setPage(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button 
+                    disabled={page === totalPages} 
+                    onClick={() => setPage(p => p + 1)}
+                    style={{ width: 'auto', padding: '0 16px' }}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>

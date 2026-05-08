@@ -6,12 +6,13 @@ import {
   HiOutlineUserGroup, HiOutlineCalendar, HiOutlineClipboardList,
   HiOutlineArrowRight, HiOutlineClock, HiOutlineShieldCheck,
   HiOutlineTrendingUp, HiOutlineBell, HiOutlineUserCircle,
-  HiOutlineChatAlt2, HiOutlineCurrencyBangladeshi, HiOutlinePaperClip
+  HiOutlineChatAlt2, HiOutlineCurrencyBangladeshi, HiOutlinePaperClip, HiOutlineStar
 } from 'react-icons/hi';
 
 export default function DoctorDashboard() {
   const { user, doctorProfile } = useAuth();
   const [stats, setStats] = useState({ totalPatients: 0, todayAppointments: 0, upcoming: [] });
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,9 +21,10 @@ export default function DoctorDashboard() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const [apptRes, patientsRes] = await Promise.all([
+        const [apptRes, patientsRes, reviewsRes] = await Promise.all([
           API.get('/appointments', { params: { limit: 10 } }),
           API.get('/doctors/patients'),
+          doctorProfile?._id ? API.get(`/reviews/doctor/${doctorProfile._id}`) : Promise.resolve({ data: [] })
         ]);
 
         const appointments = apptRes.data.appointments || [];
@@ -35,6 +37,7 @@ export default function DoctorDashboard() {
         const upcoming = appointments.filter(a => ['pending', 'confirmed'].includes(a.status)).slice(0, 5);
 
         setStats({ totalPatients: patientsRes.data.length || 0, todayAppointments, upcoming });
+        setReviews(reviewsRes.data.slice(0, 2) || []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -42,7 +45,7 @@ export default function DoctorDashboard() {
       }
     };
     fetch();
-  }, []);
+  }, [doctorProfile?._id]);
 
   const handleUpdateStatus = async (id, status) => {
     try {
@@ -173,6 +176,30 @@ export default function DoctorDashboard() {
               <Link to="/doctor/doctorprofile" className="btn btn-secondary" style={{ justifyContent: 'flex-start', borderRadius: '12px', height: '52px' }}>
                 <HiOutlineUserCircle /> Edit Profile
               </Link>
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: '24px' }}>
+            <div className="flex items-center justify-between mb-lg">
+              <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Recent Patient Feedback</h3>
+              <Link to="/doctor/reviews" style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 600 }}>See All</Link>
+            </div>
+            <div className="flex flex-col gap-md">
+              {reviews.length === 0 ? (
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '20px 0' }}>No feedback received yet.</p>
+              ) : (
+                reviews.map(review => (
+                  <div key={review._id} style={{ paddingBottom: '16px', borderBottom: '1px solid var(--outline-variant)' }}>
+                    <div className="flex items-center justify-between mb-xs">
+                      <span style={{ fontSize: '13px', fontWeight: 700 }}>{review.user?.name}</span>
+                      <div className="flex items-center gap-xs" style={{ color: '#f59e0b', fontSize: '12px' }}>
+                        <HiOutlineStar /> <span>{review.rating}</span>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>"{review.comment.substring(0, 60)}{review.comment.length > 60 ? '...' : ''}"</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

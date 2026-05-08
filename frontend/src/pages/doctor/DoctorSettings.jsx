@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
-import { 
-  HiOutlineUser, HiOutlineMail, HiOutlinePhone, 
+import {
+  HiOutlineUser, HiOutlineMail, HiOutlinePhone,
   HiOutlineCamera, HiOutlineLockClosed, HiOutlineShieldCheck,
   HiOutlineAcademicCap, HiOutlineBriefcase, HiOutlineCurrencyBangladeshi
 } from 'react-icons/hi';
@@ -11,7 +11,7 @@ import {
 export default function DoctorSettings() {
   const { user, doctorProfile, updateUser } = useAuth();
   const fileInputRef = useRef(null);
-  
+
   const [form, setForm] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -25,13 +25,13 @@ export default function DoctorSettings() {
     bio: doctorProfile?.bio || '',
     hospital: doctorProfile?.hospital || ''
   });
-  
-  const [pwForm, setPwForm] = useState({ 
-    currentPassword: '', 
-    newPassword: '', 
-    confirmPassword: '' 
+
+  const [pwForm, setPwForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(user?.avatar || null);
 
@@ -83,9 +83,9 @@ export default function DoctorSettings() {
     }
     setLoading(true);
     try {
-      await API.put('/users/profile', { 
-        currentPassword: pwForm.currentPassword, 
-        password: pwForm.newPassword 
+      await API.put('/users/profile', {
+        currentPassword: pwForm.currentPassword,
+        password: pwForm.newPassword
       });
       toast.success('Password updated successfully');
       setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -99,7 +99,7 @@ export default function DoctorSettings() {
   return (
     <div className="fade-in" style={{ paddingBottom: '40px' }}>
       <div className="page-header">
-        <h2 style={{ fontSize: '28px', fontWeight: 800 }}>Professional Profile</h2>
+        <h2 style={{ fontSize: '28px', fontWeight: 800 }}>Doctor Profile</h2>
         <p style={{ color: 'var(--text-muted)' }}>Manage your personal details and clinical information</p>
       </div>
 
@@ -108,18 +108,18 @@ export default function DoctorSettings() {
         <div className="flex flex-col gap-lg">
           <div className="card text-center" style={{ padding: '32px 24px' }}>
             <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 20px' }}>
-              <div 
-                className="avatar" 
+              <div
+                className="avatar"
                 style={{ width: '100%', height: '100%', fontSize: '40px', border: '4px solid var(--surface-container-high)', cursor: 'pointer' }}
                 onClick={handleAvatarClick}
               >
                 {preview ? <img src={preview} alt="" /> : user?.name?.charAt(0)}
               </div>
-              <button 
+              <button
                 onClick={handleAvatarClick}
-                style={{ 
-                  position: 'absolute', bottom: '0', right: '0', 
-                  width: '36px', height: '36px', borderRadius: '50%', 
+                style={{
+                  position: 'absolute', bottom: '0', right: '0',
+                  width: '36px', height: '36px', borderRadius: '50%',
                   background: 'var(--primary)', color: 'white', border: 'none',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
                   boxShadow: 'var(--shadow-md)'
@@ -131,7 +131,7 @@ export default function DoctorSettings() {
             </div>
             <h3 style={{ fontWeight: 700, fontSize: '20px', marginBottom: '4px' }}>Dr. {user?.name}</h3>
             <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '24px' }}>{doctorProfile?.specialization || 'Medical Specialist'}</p>
-            
+
             <div className="flex flex-col gap-sm" style={{ textAlign: 'left', background: 'var(--surface-container-low)', padding: '16px', borderRadius: '12px' }}>
               <div className="flex items-center gap-sm" style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                 <HiOutlineMail /> {user?.email}
@@ -156,29 +156,29 @@ export default function DoctorSettings() {
             <form onSubmit={handleChangePassword} className="flex flex-col gap-md">
               <div className="input-group">
                 <label>Current Password</label>
-                <input 
-                  type="password" className="input" 
-                  value={pwForm.currentPassword} 
-                  onChange={e => setPwForm({...pwForm, currentPassword: e.target.value})} 
-                  required 
+                <input
+                  type="password" className="input"
+                  value={pwForm.currentPassword}
+                  onChange={e => setPwForm({ ...pwForm, currentPassword: e.target.value })}
+                  required
                 />
               </div>
               <div className="input-group">
                 <label>New Password</label>
-                <input 
-                  type="password" className="input" 
-                  value={pwForm.newPassword} 
-                  onChange={e => setPwForm({...pwForm, newPassword: e.target.value})} 
-                  required 
+                <input
+                  type="password" className="input"
+                  value={pwForm.newPassword}
+                  onChange={e => setPwForm({ ...pwForm, newPassword: e.target.value })}
+                  required
                 />
               </div>
               <div className="input-group">
                 <label>Confirm New Password</label>
-                <input 
-                  type="password" className="input" 
-                  value={pwForm.confirmPassword} 
-                  onChange={e => setPwForm({...pwForm, confirmPassword: e.target.value})} 
-                  required 
+                <input
+                  type="password" className="input"
+                  value={pwForm.confirmPassword}
+                  onChange={e => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
+                  required
                 />
               </div>
               <button type="submit" className="btn btn-secondary btn-block" disabled={loading}>
@@ -201,17 +201,17 @@ export default function DoctorSettings() {
             <div className="grid grid-2 mb-lg">
               <div className="input-group">
                 <label>Full Name</label>
-                <input 
-                  className="input" value={form.name} 
-                  onChange={e => setForm({...form, name: e.target.value})} 
-                  required 
+                <input
+                  className="input" value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  required
                 />
               </div>
               <div className="input-group">
                 <label>Phone Number</label>
-                <input 
-                  className="input" value={form.phone} 
-                  onChange={e => setForm({...form, phone: e.target.value})} 
+                <input
+                  className="input" value={form.phone}
+                  onChange={e => setForm({ ...form, phone: e.target.value })}
                 />
               </div>
             </div>
@@ -227,18 +227,18 @@ export default function DoctorSettings() {
               <div className="grid grid-2 mb-lg">
                 <div className="input-group">
                   <label><HiOutlineBriefcase style={{ fontSize: '14px', marginRight: '4px' }} /> Specialization</label>
-                  <input 
-                    className="input" value={docForm.specialization} 
-                    onChange={e => setDocForm({...docForm, specialization: e.target.value})} 
-                    required 
+                  <input
+                    className="input" value={docForm.specialization}
+                    onChange={e => setDocForm({ ...docForm, specialization: e.target.value })}
+                    required
                   />
                 </div>
                 <div className="input-group">
                   <label><HiOutlineAcademicCap style={{ fontSize: '14px', marginRight: '4px' }} /> Qualifications</label>
-                  <input 
-                    className="input" value={docForm.qualification} 
-                    onChange={e => setDocForm({...docForm, qualification: e.target.value})} 
-                    required 
+                  <input
+                    className="input" value={docForm.qualification}
+                    onChange={e => setDocForm({ ...docForm, qualification: e.target.value })}
+                    required
                   />
                 </div>
               </div>
@@ -246,29 +246,29 @@ export default function DoctorSettings() {
               <div className="grid grid-2 mb-lg">
                 <div className="input-group">
                   <label><HiOutlineCurrencyBangladeshi style={{ fontSize: '14px', marginRight: '4px' }} /> Consultation Fee (৳)</label>
-                  <input 
-                    type="number" className="input" 
-                    value={docForm.consultationFee} 
-                    onChange={e => setDocForm({...docForm, consultationFee: e.target.value})} 
-                    required 
+                  <input
+                    type="number" className="input"
+                    value={docForm.consultationFee}
+                    onChange={e => setDocForm({ ...docForm, consultationFee: e.target.value })}
+                    required
                   />
                 </div>
                 <div className="input-group">
                   <label>Primary Hospital/Clinic</label>
-                  <input 
-                    className="input" value={docForm.hospital} 
-                    onChange={e => setDocForm({...docForm, hospital: e.target.value})} 
+                  <input
+                    className="input" value={docForm.hospital}
+                    onChange={e => setDocForm({ ...docForm, hospital: e.target.value })}
                   />
                 </div>
               </div>
 
               <div className="input-group">
                 <label>Professional Bio</label>
-                <textarea 
-                  className="input" rows={5} 
-                  value={docForm.bio} 
-                  onChange={e => setDocForm({...docForm, bio: e.target.value})} 
-                  placeholder="Tell patients about your clinical experience and approach..." 
+                <textarea
+                  className="input" rows={5}
+                  value={docForm.bio}
+                  onChange={e => setDocForm({ ...docForm, bio: e.target.value })}
+                  placeholder="Tell patients about your clinical experience and approach..."
                 />
               </div>
             </div>

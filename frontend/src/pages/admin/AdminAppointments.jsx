@@ -77,7 +77,7 @@ export default function AdminAppointments() {
   return (
     <div className="fade-in">
       <div className="page-header">
-        <h2>System Appointments</h2>
+        <h2>Manage Appointments</h2>
         <p>Monitor and manage all medical appointments across the platform</p>
       </div>
 
@@ -127,7 +127,7 @@ export default function AdminAppointments() {
                 <th>Type</th>
                 <th>Status</th>
                 <th>Payment</th>
-            
+
               </tr>
             </thead>
             <tbody>

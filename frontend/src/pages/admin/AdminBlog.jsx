@@ -3,13 +3,17 @@ import API from '../../api/axios';
 import toast from 'react-hot-toast';
 import {
   HiOutlineDocumentText, HiOutlineTrash, HiOutlinePlus,
-  HiOutlinePhotograph, HiOutlineEye, HiOutlineCheckCircle, HiOutlineXCircle
+  HiOutlinePhotograph, HiOutlineEye, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlinePencil
 } from 'react-icons/hi';
 
 export default function AdminBlog() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalDocs, setTotalDocs] = useState(0);
   const [form, setForm] = useState({
     title: '',
     excerpt: '',
@@ -23,17 +27,25 @@ export default function AdminBlog() {
 
   useEffect(() => {
     fetchBlogs();
-  }, []);
+  }, [page]);
 
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const { data } = await API.get('/admin/blogs');
-      setBlogs(data);
+      const { data } = await API.get(`/admin/blogs?page=${page}&limit=6`);
+      setBlogs(data.blogs);
+      setTotalPages(data.pages);
+      setTotalDocs(data.total);
     } catch (err) {
       toast.error('Failed to fetch blogs');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
     }
   };
 
@@ -52,17 +64,40 @@ export default function AdminBlog() {
     if (file) formData.append('coverImage', file);
 
     try {
-      toast.loading('Publishing blog...', { id: 'blog-post' });
-      await API.post('/admin/blogs', formData);
-      toast.success('Blog published successfully!', { id: 'blog-post' });
+      const action = editingId ? 'Updating' : 'Publishing';
+      toast.loading(`${action} blog...`, { id: 'blog-post' });
+      
+      if (editingId) {
+        await API.put(`/admin/blogs/${editingId}`, formData);
+        toast.success('Blog updated successfully!', { id: 'blog-post' });
+      } else {
+        await API.post('/admin/blogs', formData);
+        toast.success('Blog published successfully!', { id: 'blog-post' });
+      }
+
       setShowAdd(false);
+      setEditingId(null);
       setForm({ title: '', excerpt: '', content: '', category: 'wellness', isPublished: true });
       setFile(null);
       setPreview(null);
       fetchBlogs();
     } catch (err) {
-      toast.error('Failed to publish blog', { id: 'blog-post' });
+      toast.error(`Failed to ${editingId ? 'update' : 'publish'} blog`, { id: 'blog-post' });
     }
+  };
+
+  const handleEdit = (blog) => {
+    setEditingId(blog._id);
+    setForm({
+      title: blog.title,
+      excerpt: blog.excerpt,
+      content: blog.content,
+      category: blog.category,
+      isPublished: blog.isPublished
+    });
+    setPreview(blog.coverImage);
+    setShowAdd(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id) => {
@@ -81,11 +116,21 @@ export default function AdminBlog() {
       <div className="page-header flex items-center justify-between">
         <div>
           <h2>Medical Articles Management</h2>
-          <p>Create and manage health articles for your patients</p>
+          <p>{editingId ? 'Editing Article' : 'Create and manage health articles for your patients'}</p>
         </div>
         <button
           className={`btn ${showAdd ? 'btn-secondary' : 'btn-primary'}`}
-          onClick={() => setShowAdd(!showAdd)}
+          onClick={() => {
+            if (showAdd) {
+              setShowAdd(false);
+              setEditingId(null);
+              setForm({ title: '', excerpt: '', content: '', category: 'wellness', isPublished: true });
+              setPreview(null);
+              setFile(null);
+            } else {
+              setShowAdd(true);
+            }
+          }}
           style={{ gap: '8px' }}
         >
           {showAdd ? <><HiOutlineXCircle /> Cancel</> : <><HiOutlinePlus /> Create New Post</>}
@@ -174,63 +219,101 @@ export default function AdminBlog() {
             </div>
 
             <button type="submit" className="btn btn-primary btn-block">
-              Publish Article
+              {editingId ? 'Update Article' : 'Publish Article'}
             </button>
           </form>
         </div>
       ) : (
-        <div className="grid grid-3">
-          {blogs.length === 0 && !loading ? (
-            <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px' }}>
-              <HiOutlineDocumentText style={{ fontSize: '48px', color: 'var(--text-muted)', marginBottom: '16px' }} />
-              <h3>No articles yet</h3>
-              <p>Start sharing health insights with your patients by creating your first post.</p>
-            </div>
-          ) : (
-            blogs.map(blog => (
-              <div key={blog._id} className="card blog-card fade-in" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ height: '180px', position: 'relative' }}>
-                  <img
-                    src={blog.coverImage || 'https://images.unsplash.com/photo-1505751172107-16d7d6f51042?w=800&q=80'}
-                    alt=""
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  <div style={{ position: 'absolute', top: '12px', right: '12px' }}>
-                    {blog.isPublished ? (
-                      <span className="chip chip-completed"><HiOutlineCheckCircle /> Published</span>
-                    ) : (
-                      <span className="chip chip-pending">Draft</span>
-                    )}
+        <>
+          <div className="grid grid-3">
+            {blogs.length === 0 && !loading ? (
+              <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px' }}>
+                <HiOutlineDocumentText style={{ fontSize: '48px', color: 'var(--text-muted)', marginBottom: '16px' }} />
+                <h3>No articles yet</h3>
+                <p>Start sharing health insights with your patients by creating your first post.</p>
+              </div>
+            ) : (
+              blogs.map(blog => (
+                <div key={blog._id} className="card blog-card fade-in" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ height: '180px', position: 'relative' }}>
+                    <img
+                      src={blog.coverImage || 'https://images.unsplash.com/photo-1505751172107-16d7d6f51042?w=800&q=80'}
+                      alt=""
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    <div style={{ position: 'absolute', top: '12px', right: '12px' }}>
+                      {blog.isPublished ? (
+                        <span className="chip chip-completed"><HiOutlineCheckCircle /> Published</span>
+                      ) : (
+                        <span className="chip chip-pending">Draft</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>
-                    {blog.category}
-                  </span>
-                  <h4 style={{ marginBottom: '12px', lineHeight: 1.4 }}>{blog.title}</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '20px', flex: 1 }}>
-                    {blog.excerpt.length > 100 ? blog.excerpt.substring(0, 100) + '...' : blog.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between" style={{ borderTop: '1px solid var(--outline-variant)', paddingTop: '16px' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                      {new Date(blog.createdAt).toLocaleDateString()}
+                  <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '8px' }}>
+                      {blog.category}
                     </span>
-                    <div className="flex gap-xs">
-                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--text-muted)' }}><HiOutlineEye /></button>
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        style={{ color: 'var(--error)' }}
-                        onClick={() => handleDelete(blog._id)}
-                      >
-                        <HiOutlineTrash />
-                      </button>
+                    <h4 style={{ marginBottom: '12px', lineHeight: 1.4 }}>{blog.title}</h4>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '20px', flex: 1 }}>
+                      {blog.excerpt.length > 100 ? blog.excerpt.substring(0, 100) + '...' : blog.excerpt}
+                    </p>
+                    <div className="flex items-center justify-between" style={{ borderTop: '1px solid var(--outline-variant)', paddingTop: '16px' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        {new Date(blog.createdAt).toLocaleDateString()}
+                      </span>
+                      <div className="flex gap-xs">
+                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--text-muted)' }}><HiOutlineEye /></button>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          style={{ color: 'var(--primary)' }}
+                          onClick={() => handleEdit(blog)}
+                          title="Edit Article"
+                        >
+                          <HiOutlinePencil />
+                        </button>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          style={{ color: 'var(--error)' }}
+                          onClick={() => handleDelete(blog._id)}
+                        >
+                          <HiOutlineTrash />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
+              ))
+            )}
+          </div>
+
+          {blogs.length > 0 && (
+            <div className="pagination-bar flex items-center justify-between mt-xl" style={{ borderTop: '1px solid var(--outline-variant)', paddingTop: '20px' }}>
+              <div style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+                Showing <strong>{(page - 1) * 6 + 1}</strong> to <strong>{Math.min(page * 6, totalDocs)}</strong> of {totalDocs} articles
               </div>
-            ))
+
+              <div className="flex items-center gap-md">
+                <span style={{ fontSize: '14px' }}>Page {page} of {totalPages}</span>
+                <div className="flex gap-xs">
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    disabled={page === 1 || loading}
+                    onClick={() => handlePageChange(page - 1)}
+                  >
+                    Prev
+                  </button>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    disabled={page === totalPages || loading}
+                    onClick={() => handlePageChange(page + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );
