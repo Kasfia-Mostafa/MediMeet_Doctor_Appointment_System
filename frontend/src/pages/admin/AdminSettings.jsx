@@ -4,7 +4,8 @@ import API from '../../api/axios';
 import toast from 'react-hot-toast';
 import {
   HiOutlineUser, HiOutlineMail, HiOutlinePhone,
-  HiOutlineCamera, HiOutlineLockClosed, HiOutlineShieldCheck
+  HiOutlineCamera, HiOutlineLockClosed, HiOutlineShieldCheck,
+  HiOutlineEye, HiOutlineEyeOff
 } from 'react-icons/hi';
 
 export default function AdminSettings() {
@@ -26,6 +27,9 @@ export default function AdminSettings() {
   const [preview, setPreview] = useState(user?.avatar || null);
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     if (user?.avatar) {
@@ -182,13 +186,20 @@ export default function AdminSettings() {
               <div style={{ position: 'relative' }}>
                 <HiOutlineLockClosed style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
-                  type="password"
+                  type={showCurrent ? "text" : "password"}
                   className="input"
                   value={pwForm.currentPassword}
                   onChange={e => setPwForm({...pwForm, currentPassword: e.target.value})}
-                  style={{ paddingLeft: '40px' }}
+                  style={{ paddingLeft: '40px', paddingRight: '40px' }}
                   required
                 />
+                <button 
+                  type="button"
+                  onClick={() => setShowCurrent(!showCurrent)}
+                  style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                >
+                  {showCurrent ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+                </button>
               </div>
             </div>
             <div className="input-group">
@@ -196,13 +207,20 @@ export default function AdminSettings() {
               <div style={{ position: 'relative' }}>
                 <HiOutlineLockClosed style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
-                  type="password"
+                  type={showNew ? "text" : "password"}
                   className="input"
                   value={pwForm.newPassword}
                   onChange={e => setPwForm({...pwForm, newPassword: e.target.value})}
-                  style={{ paddingLeft: '40px' }}
+                  style={{ paddingLeft: '40px', paddingRight: '40px' }}
                   required
                 />
+                <button 
+                  type="button"
+                  onClick={() => setShowNew(!showNew)}
+                  style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                >
+                  {showNew ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+                </button>
               </div>
             </div>
             <div className="input-group">
@@ -210,13 +228,20 @@ export default function AdminSettings() {
               <div style={{ position: 'relative' }}>
                 <HiOutlineLockClosed style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
-                  type="password"
+                  type={showConfirm ? "text" : "password"}
                   className="input"
                   value={pwForm.confirmPassword}
                   onChange={e => setPwForm({...pwForm, confirmPassword: e.target.value})}
-                  style={{ paddingLeft: '40px' }}
+                  style={{ paddingLeft: '40px', paddingRight: '40px' }}
                   required
                 />
+                <button 
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                >
+                  {showConfirm ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+                </button>
               </div>
             </div>
             <button type="submit" className="btn btn-secondary" style={{ width: '100%', marginTop: '8px' }} disabled={loading}>

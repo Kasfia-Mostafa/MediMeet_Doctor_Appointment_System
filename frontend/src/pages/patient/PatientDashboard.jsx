@@ -17,9 +17,9 @@ export default function PatientDashboard() {
           API.get('/records'),
           API.get('/wellness/today').catch(() => ({ data: null }))
         ]);
-        
+
         const upcoming = (apptRes.data.appointments || []).filter(a => ['pending', 'confirmed'].includes(a.status)).slice(0, 3);
-        
+
         let score = 0;
         if (wellnessRes?.data?.goals) {
           const { steps, water, sleep } = wellnessRes.data.goals;
@@ -28,14 +28,15 @@ export default function PatientDashboard() {
           const sl = Math.min(sleep / 8, 1) * 100;
           score = Math.round((s + w + sl) / 3);
         }
-        
+
         setStats({ 
           appointments: apptRes.data.total || 0, 
           records: (recRes.data || []).length, 
           wellnessScore: score,
-          upcoming 
+          upcoming,
+          vitals: wellnessRes?.data?.metrics || {}
         });
-      } catch {}
+      } catch { }
       finally { setLoading(false); }
     };
     fetch();
@@ -136,7 +137,7 @@ export default function PatientDashboard() {
             <Link to="/patient/wellness" className="btn btn-secondary btn-block" style={{ justifyContent: 'flex-start', padding: '16px' }}>
               <HiOutlineHeart style={{ fontSize: '20px' }} />
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontWeight: 700 }}>Wellness Tracker</div>
+                <div style={{ fontWeight: 700 }}>Health Insight</div>
                 <div style={{ fontSize: '11px', opacity: 0.7, fontWeight: 400 }}>Monitor your vital signs and health goals</div>
               </div>
             </Link>

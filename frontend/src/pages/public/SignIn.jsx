@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import { HiOutlineMail, HiOutlineLockClosed } from 'react-icons/hi';
@@ -11,6 +11,13 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.from?.includes('book-appointment')) {
+      toast.error('Please sign in to book an appointment', { id: 'auth-redirect' });
+    }
+  }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,7 +25,8 @@ export default function SignIn() {
     try {
       const user = await login(email, password);
       toast.success(`Welcome back, ${user.name}!`);
-      navigate('/');
+      const from = location.state?.from || '/';
+      navigate(from, { replace: true });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed');
     } finally {
@@ -78,7 +86,7 @@ export default function SignIn() {
             </button>
           </form>
           <p style={{ marginTop: '24px', textAlign: 'center', fontSize: '14px' }}>
-            Don't have an account? <Link to="/signup" style={{ fontWeight: 600 }}>Sign Up</Link>
+            Don't have an account? <Link to="/signup" state={location.state} style={{ fontWeight: 600 }}>Sign Up</Link>
           </p>
         </div>
       </div>

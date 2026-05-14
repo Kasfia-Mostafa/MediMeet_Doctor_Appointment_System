@@ -4,7 +4,8 @@ const {
   getDashboard, getStaff, addStaff, updateStaff, deleteStaff, 
   getInventory, addInventory, updateInventory, getAnalytics,
   getUsers, updateUserRole,
-  getBlogs, createBlog, deleteBlog, updateBlog
+  getBlogs, createBlog, deleteBlog, updateBlog,
+  getStaffMember
 } = require('../controllers/adminController');
 const protect = require('../middleware/auth');
 const roleAuth = require('../middleware/roleAuth');
@@ -21,6 +22,7 @@ router.delete('/users/:id', deleteStaff); // Reuse deleteStaff logic
 
 // Staff/Doctor Management
 router.get('/staff', getStaff);
+router.get('/staff/:id', getStaffMember);
 router.post('/staff', upload.single('avatar'), addStaff);
 router.put('/staff/:id', upload.single('avatar'), updateStaff);
 router.delete('/staff/:id', deleteStaff);

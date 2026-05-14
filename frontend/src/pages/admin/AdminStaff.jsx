@@ -14,6 +14,8 @@ export default function AdminStaff() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalDocs, setTotalDocs] = useState(0);
+  const [deleteModal, setDeleteModal] = useState({ open: false, userId: null, userName: '' });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -52,15 +54,22 @@ export default function AdminStaff() {
     }
   };
 
-  const handleDelete = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete user "${name}"?`)) return;
+  const confirmDelete = async () => {
     try {
-      await API.delete(`/admin/users/${id}`);
+      setDeleteLoading(true);
+      await API.delete(`/admin/users/${deleteModal.userId}`);
       toast.success('User deleted successfully');
+      setDeleteModal({ open: false, userId: null, userName: '' });
       fetchUsers();
     } catch (err) {
       toast.error('Failed to delete user');
+    } finally {
+      setDeleteLoading(false);
     }
+  };
+
+  const handleDeleteClick = (id, name) => {
+    setDeleteModal({ open: true, userId: id, userName: name });
   };
 
   return (
@@ -159,11 +168,11 @@ export default function AdminStaff() {
                     <td style={{ textAlign: 'right' }}>
                       <button
                         className="btn btn-ghost btn-sm"
-                        style={{ color: 'var(--error)' }}
-                        onClick={() => handleDelete(u._id, u.name)}
-                        title="Delete User"
+                        style={{ color: 'var(--error)', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        onClick={() => handleDeleteClick(u._id, u.name)}
                       >
                         <HiOutlineTrash />
+                        <span>Delete</span>
                       </button>
                     </td>
                   </tr>
@@ -198,6 +207,48 @@ export default function AdminStaff() {
             </div>
           </div>
         </>
+      )}
+      {/* Delete Confirmation Modal */}
+      {deleteModal.open && (
+        <div className="modal-overlay fade-in" style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1000, backdropFilter: 'blur(4px)'
+        }}>
+          <div className="card scale-in" style={{
+            width: '100%', maxWidth: '400px', padding: '32px', textAlign: 'center',
+            boxShadow: 'var(--shadow-lg)', border: '1px solid var(--outline-variant)'
+          }}>
+            <div style={{
+              width: '64px', height: '64px', borderRadius: '50%', background: 'var(--error-container)',
+              color: 'var(--error)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 20px', fontSize: '32px'
+            }}>
+              <HiOutlineTrash />
+            </div>
+            <h3 style={{ marginBottom: '12px' }}>Delete User?</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '24px', fontSize: '14px' }}>
+              Are you sure you want to delete <strong>{deleteModal.userName}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex gap-md">
+              <button 
+                className="btn btn-secondary btn-block" 
+                onClick={() => setDeleteModal({ open: false, userId: null, userName: '' })}
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-primary btn-block" 
+                style={{ background: 'var(--error)', borderColor: 'var(--error)' }}
+                onClick={confirmDelete}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete Now'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

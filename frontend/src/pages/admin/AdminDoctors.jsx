@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
-import { HiOutlineSearch, HiOutlinePlus, HiOutlineUserGroup, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi';
+import { HiOutlineSearch, HiOutlinePlus, HiOutlineUserGroup, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineTrash } from 'react-icons/hi';
 
 export default function AdminDoctors() {
   const [doctors, setDoctors] = useState([]);
@@ -26,6 +26,18 @@ export default function AdminDoctors() {
       setLoading(false);
     }
   }, [page, search]);
+
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to delete Dr. ${name}?`)) return;
+    try {
+      await API.delete(`/admin/staff/${id}`);
+      toast.success('Doctor deleted successfully');
+      fetchDoctors();
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message;
+      toast.error(`Delete Error: ${msg}`);
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -95,12 +107,12 @@ export default function AdminDoctors() {
                 {doctors.map(d => (
                   <tr key={d._id} className="hover-row">
                     <td>
-                      <Link to={`/admin/doctors/${d._id}`} className="flex items-center gap-sm no-underline" style={{ color: 'inherit' }}>
+                      <Link to={`/admin/doctors/${d.user?._id}`} className="flex items-center gap-sm no-underline" style={{ color: 'inherit' }}>
                         <div className="avatar" style={{ width: '40px', height: '40px', fontSize: '16px', flexShrink: 0 }}>
                           {d.user?.avatar ? (
                             <img src={d.user.avatar} alt={d.user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           ) : (
-                            d.user?.name.charAt(0)
+                            d.user?.name?.charAt(0)
                           )}
                         </div>
                         <div>
@@ -112,7 +124,7 @@ export default function AdminDoctors() {
                     <td>{d.user?.email}</td>
                     <td>৳{d.consultationFee}</td>
                     <td>
-                      <span className={`chip ${d.isAvailable ? 'chip-confirmed' : 'chip-pending'}`}>
+                      <span className={`chip ${d.isAvailable ? 'chip-confirmed' : 'chip-pending'}`} style={{ width: 'fit-content' }}>
                         {d.isAvailable ? 'Active' : 'Inactive'}
                       </span>
                     </td>

@@ -96,6 +96,20 @@ const addStaff = async (req, res, next) => {
 
     const user = await User.create({ name, email, password, role, phone, avatar: avatarUrl, avatarPublicId });
     if (role === 'doctor' && specialization) {
+      let slots = [];
+      if (req.body.timeSlots) {
+        try {
+          slots = typeof req.body.timeSlots === 'string' ? JSON.parse(req.body.timeSlots) : req.body.timeSlots;
+        } catch (e) { slots = []; }
+      }
+
+      let days = [];
+      if (req.body.availableDays) {
+        try {
+          days = typeof req.body.availableDays === 'string' ? JSON.parse(req.body.availableDays) : req.body.availableDays;
+        } catch (e) { days = []; }
+      }
+
       await Doctor.create({ 
         user: user._id, 
         specialization, 
@@ -104,11 +118,56 @@ const addStaff = async (req, res, next) => {
         experience: Number(experience) || 0,
         hospital: hospital || '',
         location: location || '',
-        isAvailable: isAvailable === 'true' || isAvailable === true
+        isAvailable: isAvailable === 'true' || isAvailable === true,
+        timeSlots: slots,
+        availableDays: days
       });
     }
     res.status(201).json(user);
   } catch (error) { next(error); }
+};
+
+const getStaffMember = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    
+    // First, try to find by User ID (preferred for admin consistency)
+    let doctor = await Doctor.findOne({ user: id }).populate('user', '-password');
+    
+    // If not found by User ID, try to find directly by Doctor document ID
+    if (!doctor) {
+      doctor = await Doctor.findById(id).populate('user', '-password');
+    }
+
+    if (!doctor) {
+      // Check if it's just a user (like staff/admin) without a doctor profile
+      const user = await User.findById(id).select('-password');
+      if (!user) {
+        return res.status(404).json({ message: 'Staff/User not found with provided ID' });
+      }
+
+      // If user is a doctor but has no profile document, create one on the fly
+      if (user.role === 'doctor') {
+        doctor = await Doctor.create({ 
+          user: user._id,
+          specialization: 'Not Specified',
+          qualification: 'Not Specified',
+          experience: 0,
+          consultationFee: 0,
+          isAvailable: true
+        });
+        // Re-populate user data
+        doctor = await Doctor.findById(doctor._id).populate('user', '-password');
+      } else {
+        return res.json({ user, role: user.role });
+      }
+    }
+    
+    res.json(doctor);
+  } catch (error) {
+    console.error('getStaffMember Error:', error);
+    res.status(500).json({ message: 'Error retrieving staff details', error: error.message });
+  }
 };
 
 const updateStaff = async (req, res, next) => {
@@ -139,22 +198,47 @@ const updateStaff = async (req, res, next) => {
     await user.save();
 
     if (user.role === 'doctor') {
+      let slots = [];
+      if (req.body.timeSlots) {
+        try {
+          slots = typeof req.body.timeSlots === 'string' ? JSON.parse(req.body.timeSlots) : req.body.timeSlots;
+        } catch (e) { slots = []; }
+      }
+
+      let days = [];
+      if (req.body.availableDays) {
+        try {
+          days = typeof req.body.availableDays === 'string' ? JSON.parse(req.body.availableDays) : req.body.availableDays;
+        } catch (e) { days = []; }
+      }
+
+      const updateData = { 
+        specialization, 
+        qualification, 
+        consultationFee: Number(consultationFee), 
+        experience: Number(experience),
+        hospital,
+        location,
+        isAvailable: isAvailable === 'true' || isAvailable === true,
+      };
+
+      if (req.body.timeSlots) {
+        updateData.timeSlots = slots;
+      }
+
       await Doctor.findOneAndUpdate(
         { user: user._id },
-        { 
-          specialization, 
-          qualification, 
-          consultationFee: Number(consultationFee), 
-          experience: Number(experience),
-          hospital,
-          location,
-          isAvailable: isAvailable === 'true' || isAvailable === true
-        },
+        updateData,
         { upsert: true, new: true }
       );
     }
 
-    res.json(user);
+    if (user.role === 'doctor') {
+      const updatedDoctor = await Doctor.findOne({ user: user._id }).populate('user', '-password');
+      res.json(updatedDoctor);
+    } else {
+      res.json(user);
+    }
   } catch (error) { next(error); }
 };
 
@@ -353,5 +437,6 @@ module.exports = {
   getBlogs,
   createBlog,
   deleteBlog,
-  updateBlog
+  updateBlog,
+  getStaffMember
 };

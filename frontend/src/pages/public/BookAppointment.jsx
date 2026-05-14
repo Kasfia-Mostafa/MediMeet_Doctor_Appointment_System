@@ -184,7 +184,11 @@ export default function BookAppointment() {
 
   const handleBookClick = () => {
     console.log('[BookAppointment] handleBookClick', { consultationFee: doctorInfo?.consultationFee });
-    if (!user) { toast.error('Please sign in to book'); navigate('/signin'); return; }
+    if (!user) { 
+      toast.error('Please sign in to book'); 
+      navigate('/signin', { state: { from: window.location.pathname + window.location.search } }); 
+      return; 
+    }
 
     if (!doctorInfo?.consultationFee || doctorInfo.consultationFee === 0) {
       handleFinalSubmit(); // Free consultation, skip stripe

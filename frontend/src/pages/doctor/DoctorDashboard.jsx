@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
 import { useAuth } from '../../hooks/useAuth';
+import toast from 'react-hot-toast';
 import {
   HiOutlineUserGroup, HiOutlineCalendar, HiOutlineClipboardList,
   HiOutlineArrowRight, HiOutlineClock, HiOutlineShieldCheck,
@@ -11,8 +12,7 @@ import {
 
 export default function DoctorDashboard() {
   const { user, doctorProfile } = useAuth();
-  const [stats, setStats] = useState({ totalPatients: 0, todayAppointments: 0, upcoming: [] });
-  const [reviews, setReviews] = useState([]);
+  const [stats, setStats] = useState({ totalPatients: 0, todayAppointments: 0, upcoming: [], history: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,9 +35,9 @@ export default function DoctorDashboard() {
         }).length;
 
         const upcoming = appointments.filter(a => ['pending', 'confirmed'].includes(a.status)).slice(0, 5);
+        const history = appointments.filter(a => ['completed', 'cancelled'].includes(a.status)).slice(0, 5);
 
-        setStats({ totalPatients: patientsRes.data.length || 0, todayAppointments, upcoming });
-        setReviews(reviewsRes.data.slice(0, 2) || []);
+        setStats({ totalPatients: patientsRes.data.length || 0, todayAppointments, upcoming, history });
       } catch (err) {
         console.error(err);
       } finally {
@@ -178,25 +178,26 @@ export default function DoctorDashboard() {
               </Link>
             </div>
           </div>
-
           <div className="card" style={{ padding: '24px' }}>
             <div className="flex items-center justify-between mb-lg">
-              <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Recent Patient Feedback</h3>
-              <Link to="/doctor/reviews" style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 600 }}>See All</Link>
+              <h3 style={{ fontSize: '18px', fontWeight: 700 }}>Appointment History</h3>
+              <Link to="/doctor/appointments" style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 600 }}>See All</Link>
             </div>
             <div className="flex flex-col gap-md">
-              {reviews.length === 0 ? (
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '20px 0' }}>No feedback received yet.</p>
+              {stats.history.length === 0 ? (
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '20px 0' }}>No past appointments.</p>
               ) : (
-                reviews.map(review => (
-                  <div key={review._id} style={{ paddingBottom: '16px', borderBottom: '1px solid var(--outline-variant)' }}>
+                stats.history.map(appt => (
+                  <div key={appt._id} style={{ paddingBottom: '16px', borderBottom: '1px solid var(--outline-variant)' }}>
                     <div className="flex items-center justify-between mb-xs">
-                      <span style={{ fontSize: '13px', fontWeight: 700 }}>{review.user?.name}</span>
-                      <div className="flex items-center gap-xs" style={{ color: '#f59e0b', fontSize: '12px' }}>
-                        <HiOutlineStar /> <span>{review.rating}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700 }}>{appt.patient?.name}</span>
+                      <span className={`chip chip-${appt.status}`} style={{ fontSize: '10px' }}>{appt.status}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                        {new Date(appt.date).toLocaleDateString()}
                       </div>
                     </div>
-                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>"{review.comment.substring(0, 60)}{review.comment.length > 60 ? '...' : ''}"</p>
                   </div>
                 ))
               )}

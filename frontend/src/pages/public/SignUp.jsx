@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import Logo from '../../assets/MediMeet-Logo.png';
@@ -9,6 +9,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -21,7 +22,8 @@ export default function SignUp() {
       const userData = { ...form, phone: form.phone ? `+880${form.phone}` : '' };
       const user = await register(userData);
       toast.success(`Welcome, ${user.name}!`);
-      navigate('/');
+      const from = location.state?.from || '/';
+      navigate(from, { replace: true });
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -89,7 +91,7 @@ export default function SignUp() {
             </button>
           </form>
           <p style={{ marginTop: '24px', textAlign: 'center', fontSize: '14px' }}>
-            Already have an account? <Link to="/signin" style={{ fontWeight: 600 }}>Sign In</Link>
+            Already have an account? <Link to="/signin" state={location.state} style={{ fontWeight: 600 }}>Sign In</Link>
           </p>
         </div>
       </div>

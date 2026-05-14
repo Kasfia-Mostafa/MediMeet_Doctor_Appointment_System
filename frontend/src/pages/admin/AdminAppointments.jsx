@@ -98,7 +98,7 @@ export default function AdminAppointments() {
             <HiOutlineSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input
               type="text"
-              placeholder="Search patient, doctor or reason..."
+              placeholder="Search patient or doctor..."
               className="input"
               style={{ paddingLeft: '36px' }}
               value={searchTerm}
@@ -125,6 +125,7 @@ export default function AdminAppointments() {
                 <th>Doctor</th>
                 <th>Date & Time</th>
                 <th>Type</th>
+                <th>Reason</th>
                 <th>Status</th>
                 <th>Payment</th>
 
@@ -157,6 +158,11 @@ export default function AdminAppointments() {
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{formatTime12h(a.timeSlot)}</div>
                   </td>
                   <td><span style={{ textTransform: 'capitalize' }}>{a.type}</span></td>
+                  <td>
+                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={a.reason}>
+                      {a.reason || 'General Checkup'}
+                    </div>
+                  </td>
                   <td>
                     <select
                       className={`chip chip-${a.status === 'no-show' ? 'expired' : a.status}`}

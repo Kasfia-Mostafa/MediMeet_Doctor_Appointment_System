@@ -46,9 +46,9 @@ export default function PatientWellness() {
     try {
       const res = await API.post('/wellness/today', data);
       setData(res.data);
-      toast.success('Wellness tracker updated!');
+      toast.success('Health Insight updated!');
       setIsEditing(false);
-      
+
       // Refresh history
       const historyRes = await API.get('/wellness/history');
       setHistory(historyRes.data || []);
@@ -65,7 +65,7 @@ export default function PatientWellness() {
     <div className="fade-in">
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h2>Wellness Tracker</h2>
+          <h2>Health Insight</h2>
           <p>Monitor your daily health metrics and wellness goals</p>
         </div>
         {!isEditing ? (
@@ -198,7 +198,8 @@ export default function PatientWellness() {
                   <div className="flex gap-md" style={{ fontSize: '13px' }}>
                     <span title="Steps">👟 {entry.goals?.steps || 0}</span>
                     <span title="Water">💧 {entry.goals?.water || 0}</span>
-                    <span title="Heart Rate">❤️ {entry.metrics?.heartRate || 0}</span>
+                    <span title="Blood Pressure">🩸 {entry.metrics?.bloodPressure || '-'}</span>
+                    <span title="Temperature">🌡️ {entry.metrics?.temperature || '-'}°F</span>
                   </div>
                 </div>
               ))}

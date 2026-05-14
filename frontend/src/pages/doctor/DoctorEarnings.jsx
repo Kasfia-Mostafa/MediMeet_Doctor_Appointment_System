@@ -40,7 +40,7 @@ export default function DoctorEarnings() {
         <p>Track your consultation earnings and payment history</p>
       </div>
 
-      <div className="grid grid-3 mb-xl">
+      <div className="grid grid-2 mb-xl">
         <div className="stat-card" style={{ background: 'linear-gradient(135deg, var(--primary), #4f46e5)', color: 'white' }}>
           <div className="stat-icon" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}><HiOutlineCurrencyBangladeshi /></div>
           <div>
@@ -55,14 +55,7 @@ export default function DoctorEarnings() {
             <div className="stat-label">Paid Consultations</div>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon stat-icon-warning"><HiOutlineTrendingUp /></div>
-          <div>
-            <div className="stat-value">{stats.pendingPayments}</div>
-            <div className="stat-label">Pending Settlements</div>
-          </div>
         </div>
-      </div>
 
       <div className="card">
         <div className="card-header flex items-center justify-between mb-lg">

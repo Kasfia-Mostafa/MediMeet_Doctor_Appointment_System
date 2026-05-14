@@ -5,7 +5,8 @@ import toast from 'react-hot-toast';
 import {
   HiOutlineUser, HiOutlineMail, HiOutlinePhone,
   HiOutlineCamera, HiOutlineLockClosed, HiOutlineShieldCheck,
-  HiOutlineAcademicCap, HiOutlineBriefcase, HiOutlineCurrencyBangladeshi
+  HiOutlineAcademicCap, HiOutlineBriefcase, HiOutlineCurrencyBangladeshi,
+  HiOutlineEye, HiOutlineEyeOff
 } from 'react-icons/hi';
 
 export default function DoctorSettings() {
@@ -34,6 +35,9 @@ export default function DoctorSettings() {
 
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(user?.avatar || null);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     if (user?.avatar) {
@@ -156,30 +160,60 @@ export default function DoctorSettings() {
             <form onSubmit={handleChangePassword} className="flex flex-col gap-md">
               <div className="input-group">
                 <label>Current Password</label>
-                <input
-                  type="password" className="input"
-                  value={pwForm.currentPassword}
-                  onChange={e => setPwForm({ ...pwForm, currentPassword: e.target.value })}
-                  required
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showCurrent ? "text" : "password"} className="input"
+                    value={pwForm.currentPassword}
+                    onChange={e => setPwForm({ ...pwForm, currentPassword: e.target.value })}
+                    required
+                    style={{ paddingRight: '40px' }}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowCurrent(!showCurrent)}
+                    style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                  >
+                    {showCurrent ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+                  </button>
+                </div>
               </div>
               <div className="input-group">
                 <label>New Password</label>
-                <input
-                  type="password" className="input"
-                  value={pwForm.newPassword}
-                  onChange={e => setPwForm({ ...pwForm, newPassword: e.target.value })}
-                  required
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showNew ? "text" : "password"} className="input"
+                    value={pwForm.newPassword}
+                    onChange={e => setPwForm({ ...pwForm, newPassword: e.target.value })}
+                    required
+                    style={{ paddingRight: '40px' }}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowNew(!showNew)}
+                    style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                  >
+                    {showNew ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+                  </button>
+                </div>
               </div>
               <div className="input-group">
                 <label>Confirm New Password</label>
-                <input
-                  type="password" className="input"
-                  value={pwForm.confirmPassword}
-                  onChange={e => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
-                  required
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showConfirm ? "text" : "password"} className="input"
+                    value={pwForm.confirmPassword}
+                    onChange={e => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
+                    required
+                    style={{ paddingRight: '40px' }}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                  >
+                    {showConfirm ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+                  </button>
+                </div>
               </div>
               <button type="submit" className="btn btn-secondary btn-block" disabled={loading}>
                 Update Password

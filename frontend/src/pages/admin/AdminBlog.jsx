@@ -23,6 +23,9 @@ export default function AdminBlog() {
   });
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -100,19 +103,97 @@ export default function AdminBlog() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this blog post?')) return;
+  const handleDeleteClick = (id) => {
+    setDeletingId(id);
+    setShowDeleteModal(true);
+  };
+
+  const executeDelete = async () => {
     try {
-      await API.delete(`/admin/blogs/${id}`);
-      toast.success('Blog deleted');
+      setIsDeleting(true);
+      await API.delete(`/admin/blogs/${deletingId}`);
+      toast.success('Article removed successfully');
+      setShowDeleteModal(false);
+      setDeletingId(null);
       fetchBlogs();
     } catch (err) {
-      toast.error('Delete failed');
+      toast.error('Failed to remove article');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   return (
     <div className="fade-in">
+      {/* Premium Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <div className="card" style={{ 
+            width: '100%', 
+            maxWidth: '400px', 
+            padding: '32px',
+            animation: 'slideUp 0.3s ease-out',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+              <div style={{ 
+                width: '64px', height: '64px', 
+                backgroundColor: 'rgba(var(--error-rgb, 220, 53, 69), 0.1)', 
+                borderRadius: '50%', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--error)'
+              }}>
+                <HiOutlineTrash style={{ fontSize: '32px' }} />
+              </div>
+            </div>
+            
+            <h3 style={{ textAlign: 'center', marginBottom: '12px', color: 'var(--text-primary)' }}>Remove Article?</h3>
+            <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '32px', lineHeight: '1.5' }}>
+              Are you sure you want to permanently remove this article? This action cannot be undone.
+            </p>
+            
+            <div className="flex gap-md">
+              <button 
+                className="btn btn-secondary" 
+                style={{ flex: 1, padding: '12px' }}
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn" 
+                style={{ 
+                  flex: 1, 
+                  padding: '12px', 
+                  backgroundColor: 'var(--error)', 
+                  color: 'white', 
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+                onClick={executeDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Removing...' : 'Yes, Remove'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="page-header flex items-center justify-between">
         <div>
           <h2>Medical Articles Management</h2>
@@ -262,7 +343,6 @@ export default function AdminBlog() {
                         {new Date(blog.createdAt).toLocaleDateString()}
                       </span>
                       <div className="flex gap-xs">
-                        <button className="btn btn-ghost btn-sm" style={{ color: 'var(--text-muted)' }}><HiOutlineEye /></button>
                         <button
                           className="btn btn-ghost btn-sm"
                           style={{ color: 'var(--primary)' }}
@@ -274,7 +354,7 @@ export default function AdminBlog() {
                         <button
                           className="btn btn-ghost btn-sm"
                           style={{ color: 'var(--error)' }}
-                          onClick={() => handleDelete(blog._id)}
+                          onClick={() => handleDeleteClick(blog._id)}
                         >
                           <HiOutlineTrash />
                         </button>

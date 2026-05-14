@@ -24,14 +24,14 @@ const getRecords = async (req, res, next) => {
 // @route   POST /api/records
 const createRecord = async (req, res, next) => {
   try {
-    const { patient, appointment, type, title, description, diagnosis, medications, vitals } = req.body;
+    const { patient, appointment, type, title, description, medications, vitals } = req.body;
 
     const files = req.files
       ? req.files.map((f) => ({ url: f.path, publicId: f.filename, name: f.originalname, type: f.mimetype }))
       : [];
 
     const record = await MedicalRecord.create({
-      patient, doctor: req.user._id, appointment, type, title, description, diagnosis,
+      patient, doctor: req.user._id, appointment, type, title, description,
       medications: medications ? JSON.parse(medications) : [],
       vitals: vitals ? JSON.parse(vitals) : {},
       files,
@@ -67,7 +67,7 @@ const getRecord = async (req, res, next) => {
 // @route   PUT /api/records/:id
 const updateRecord = async (req, res, next) => {
   try {
-    const { title, type, description, diagnosis } = req.body;
+    const { title, type, description } = req.body;
     let record = await MedicalRecord.findById(req.params.id);
 
     if (!record) {
@@ -84,7 +84,7 @@ const updateRecord = async (req, res, next) => {
     record.title = title || record.title;
     record.type = type || record.type;
     record.description = description || record.description;
-    if (diagnosis !== undefined) record.diagnosis = diagnosis;
+
 
     if (req.files && req.files.length > 0) {
       const newFiles = req.files.map((f) => ({ url: f.path, publicId: f.filename, name: f.originalname, type: f.mimetype }));

@@ -79,7 +79,7 @@ function App() {
         <Route path="/blog/:id" element={<PublicLayout><BlogDetails /></PublicLayout>} />
         <Route path="/find-doctor" element={<PublicLayout><FindDoctor /></PublicLayout>} />
         <Route path="/doctor-details/:id" element={<PublicLayout><DoctorDetails /></PublicLayout>} />
-        <Route path="/book-appointment" element={<PublicLayout><BookAppointment /></PublicLayout>} />
+        <Route path="/book-appointment" element={<ProtectedRoute><PublicLayout><BookAppointment /></PublicLayout></ProtectedRoute>} />
 
         {/* Patient Routes */}
         <Route path="/patient" element={<RoleRoute roles={['patient']}><DashboardLayout /></RoleRoute>}>

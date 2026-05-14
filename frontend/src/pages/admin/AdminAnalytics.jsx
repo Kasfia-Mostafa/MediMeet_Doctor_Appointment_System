@@ -1,18 +1,11 @@
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import { HiOutlineChartBar, HiOutlineCurrencyBangladeshi, HiOutlineCalendar, HiOutlineTrendingUp } from 'react-icons/hi';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend } from 'recharts';
 
 const COLORS = ['var(--primary)', 'var(--secondary)', 'var(--success)', '#FF8042', '#8884d8'];
 
-const mockMonthlyData = [
-  { name: 'Jan', revenue: 45000, appointments: 120 },
-  { name: 'Feb', revenue: 52000, appointments: 145 },
-  { name: 'Mar', revenue: 48000, appointments: 130 },
-  { name: 'Apr', revenue: 61000, appointments: 175 },
-  { name: 'May', revenue: 59000, appointments: 160 },
-  { name: 'Jun', revenue: 75000, appointments: 210 },
-];
+
 
 export default function AdminAnalytics() {
   const [stats, setStats] = useState({ revenue: 0, appointments: 0, doctors: 0, byStatus: [], bySpec: [] });
@@ -102,48 +95,7 @@ export default function AdminAnalytics() {
         </div>
       </div>
 
-      <div className="grid grid-2 mt-xl">
-        <div className="card">
-          <div className="card-header"><h4>Revenue Overview (Last 6 Months)</h4></div>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <AreaChart data={mockMonthlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `৳${value}`} />
-                <RechartsTooltip
-                  contentStyle={{ backgroundColor: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)' }}
-                  itemStyle={{ color: 'var(--text)' }}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="var(--primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
 
-        <div className="card">
-          <div className="card-header"><h4>Appointment Trends (Last 6 Months)</h4></div>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <BarChart data={mockMonthlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                <RechartsTooltip
-                  contentStyle={{ backgroundColor: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)' }}
-                  cursor={{ fill: 'var(--surface-container)' }}
-                />
-                <Bar dataKey="appointments" fill="var(--secondary)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
 
       {stats.byStatus?.length > 0 && (
         <div className="card mt-xl">

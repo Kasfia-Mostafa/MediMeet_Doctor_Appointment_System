@@ -7,7 +7,7 @@ const medicalRecordSchema = new mongoose.Schema(
     appointment: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' },
     type: {
       type: String,
-      enum: ['prescription', 'lab-result', 'diagnosis', 'other'],
+      enum: ['prescription', 'lab-result', 'other'],
       required: true,
     },
     title: { type: String, required: true },

@@ -6,7 +6,8 @@ import {
   HiOutlineUserAdd, HiOutlineMail, HiOutlinePhone, 
   HiOutlineAcademicCap, HiOutlineBriefcase, HiOutlineCurrencyBangladeshi,
   HiOutlineStar, HiOutlineUser, HiOutlineBadgeCheck, HiOutlineCamera, HiOutlineStatusOnline,
-  HiOutlineArrowLeft, HiOutlineTrash, HiOutlineLockClosed
+  HiOutlineArrowLeft, HiOutlineTrash, HiOutlineLockClosed, HiOutlineClock, HiOutlineCalendar, HiOutlinePlus, HiOutlinePencil,
+  HiOutlineEye, HiOutlineEyeOff
 } from 'react-icons/hi';
 
 export default function DoctorDetail() {
@@ -27,20 +28,21 @@ export default function DoctorDetail() {
     hospital: '',
     location: '',
     status: 'Active',
+    timeSlots: [],
   });
+  const [newSlot, setNewSlot] = useState({ day: 'monday', startTime: '09:00', endTime: '13:00', maxPatients: 10 });
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState(null);
-  const [timeSlots, setTimeSlots] = useState([]);
+  const [showPass, setShowPass] = useState(false);
 
   useEffect(() => {
     const fetchDoctor = async () => {
       try {
-        const { data } = await API.get(`/doctors/${id}`);
+        const { data } = await API.get(`/admin/staff/${id}`);
         setUserId(data.user?._id);
-        setTimeSlots(data.timeSlots || []);
         setForm({
           name: data.user?.name || '',
           email: data.user?.email || '',
@@ -54,7 +56,10 @@ export default function DoctorDetail() {
           hospital: data.hospital || '',
           location: data.location || '',
           status: data.isAvailable ? 'Active' : 'Inactive',
+          timeSlots: data.timeSlots || [],
         });
+        console.log('Fetched Doctor Data:', data);
+        console.log('Time Slots in state:', data.timeSlots);
         setPreview(data.user?.avatar || null);
       } catch (err) {
         toast.error('Failed to fetch doctor details');
@@ -67,6 +72,16 @@ export default function DoctorDetail() {
   }, [id, navigate]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const addSlot = () => {
+    setForm(prev => ({ ...prev, timeSlots: [...prev.timeSlots, newSlot] }));
+  };
+
+  const removeSlot = (index) => {
+    const slots = [...form.timeSlots];
+    slots.splice(index, 1);
+    setForm({ ...form, timeSlots: slots });
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -86,6 +101,8 @@ export default function DoctorDetail() {
         formData.append('isAvailable', form.status === 'Active');
       } else if (key === 'password') {
         if (form.password) formData.append('password', form.password);
+      } else if (key === 'timeSlots') {
+        formData.append(key, JSON.stringify(form[key]));
       } else {
         formData.append(key, form[key]);
       }
@@ -96,7 +113,10 @@ export default function DoctorDetail() {
     }
 
     try {
-      await API.put(`/admin/staff/${userId}`, formData);
+      console.log('Updating Doctor with ID:', userId);
+      console.log('Sending Time Slots:', JSON.stringify(form.timeSlots));
+      const { data: updatedData } = await API.put(`/admin/staff/${userId}`, formData);
+      console.log('Update Response Data:', updatedData);
       toast.success('Doctor updated successfully!');
       navigate('/admin/doctors');
     } catch (err) {
@@ -123,6 +143,10 @@ export default function DoctorDetail() {
 
   return (
     <div className="fade-in">
+      <details style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '10px' }}>
+        <summary>Debug Data (Slots: {form.timeSlots?.length || 0})</summary>
+        <pre>{JSON.stringify(form.timeSlots, null, 2)}</pre>
+      </details>
       {/* Premium Delete Confirmation Modal */}
       {showDeleteModal && (
         <div style={{
@@ -276,7 +300,22 @@ export default function DoctorDetail() {
               <label>New Password (Optional)</label>
               <div style={{ position: 'relative' }}>
                 <HiOutlineLockClosed style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input type="password" name="password" className="input" placeholder="Leave blank to keep current" value={form.password} onChange={handleChange} style={{ paddingLeft: '40px' }} />
+                <input 
+                  type={showPass ? "text" : "password"} 
+                  name="password" 
+                  className="input" 
+                  placeholder="Leave blank to keep current" 
+                  value={form.password} 
+                  onChange={handleChange} 
+                  style={{ paddingLeft: '40px', paddingRight: '40px' }} 
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                >
+                  {showPass ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+                </button>
               </div>
             </div>
           </div>
@@ -352,32 +391,109 @@ export default function DoctorDetail() {
           </div>
         </div>
 
-        {/* Weekly Availability Section */}
+        {/* Availability & Slots Section */}
         <div className="card mb-lg" style={{ padding: '32px' }}>
           <div className="flex items-center gap-sm mb-lg" style={{ borderBottom: '1px solid var(--outline-variant)', paddingBottom: '16px' }}>
-            <HiOutlineStatusOnline style={{ fontSize: '24px', color: 'var(--primary)' }} />
-            <h3 style={{ margin: 0 }}>Weekly Availability</h3>
+            <HiOutlineCalendar style={{ fontSize: '24px', color: 'var(--primary)' }} />
+            <h3 style={{ margin: 0 }}>Weekly Scheduling Slots ({form.timeSlots?.length || 0})</h3>
           </div>
-          
-          <div className="grid grid-3 gap-md">
-            {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => {
-              const daySessions = timeSlots.filter(ts => ts.day === day);
-              return (
-                <div key={day} className="card-sub" style={{ padding: '16px', backgroundColor: 'var(--surface-container-low)', borderRadius: '12px' }}>
-                  <h4 style={{ textTransform: 'capitalize', marginBottom: '8px', color: 'var(--primary)', borderBottom: '1px solid var(--outline-variant)', paddingBottom: '4px' }}>{day}</h4>
-                  {daySessions.length > 0 ? (
-                    daySessions.map((session, idx) => (
-                      <div key={idx} style={{ fontSize: '13px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ fontSize: '14px' }}>🕒</span> {session.startTime} - {session.endTime}
+
+          <div style={{ background: 'var(--surface-container-low)', padding: '24px', borderRadius: '20px' }}>
+            <h4 style={{ margin: '0 0 16px 0', fontSize: '15px' }}>Add Scheduling Slots</h4>
+            <div className="grid grid-3 items-end" style={{ gap: '16px' }}>
+              <div className="input-group" style={{ margin: 0 }}>
+                <label style={{ fontSize: '12px' }}>Day</label>
+                <select 
+                  className="input" 
+                  value={newSlot.day} 
+                  onChange={e => setNewSlot({...newSlot, day: e.target.value})}
+                >
+                  {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(d => (
+                    <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="input-group" style={{ margin: 0 }}>
+                <label style={{ fontSize: '12px' }}>Start Time</label>
+                <input 
+                  type="time" 
+                  className="input" 
+                  value={newSlot.startTime} 
+                  onChange={e => setNewSlot({...newSlot, startTime: e.target.value})}
+                />
+              </div>
+              <div className="input-group" style={{ margin: 0 }}>
+                <label style={{ fontSize: '12px' }}>End Time</label>
+                <input 
+                  type="time" 
+                  className="input" 
+                  value={newSlot.endTime} 
+                  onChange={e => setNewSlot({...newSlot, endTime: e.target.value})}
+                />
+              </div>
+            </div>
+            <button 
+              type="button" 
+              className="btn btn-secondary mt-md" 
+              onClick={addSlot}
+              style={{ width: '100%', borderStyle: 'dashed' }}
+            >
+              <HiOutlinePlus /> Add This Slot
+            </button>
+          </div>
+
+          {form.timeSlots.length > 0 ? (
+            <div className="mt-lg">
+              <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', color: 'var(--text-muted)' }}>Current Slots</h4>
+              <div className="flex flex-col gap-sm">
+                {form.timeSlots.map((slot, index) => (
+                  <div 
+                    key={index} 
+                    className="flex items-center justify-between"
+                    style={{ 
+                      padding: '12px 20px', 
+                      background: 'var(--surface-container-lowest)', 
+                      borderRadius: '12px',
+                      border: '1px solid var(--outline-variant)'
+                    }}
+                  >
+                    <div className="flex items-center gap-md">
+                      <span style={{ fontWeight: 700, textTransform: 'capitalize', minWidth: '80px' }}>{slot.day}</span>
+                      <div className="flex items-center gap-xs" style={{ color: 'var(--primary)' }}>
+                        <HiOutlineClock />
+                        <span style={{ fontWeight: 600 }}>{slot.startTime} - {slot.endTime}</span>
                       </div>
-                    ))
-                  ) : (
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No slots configured</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    </div>
+                    <div className="flex items-center gap-sm">
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          setNewSlot(slot);
+                          removeSlot(index);
+                        }}
+                        style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer' }}
+                        title="Edit Slot"
+                      >
+                        <HiOutlinePencil />
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => removeSlot(index)}
+                        style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer' }}
+                        title="Remove Slot"
+                      >
+                        <HiOutlineTrash />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-lg p-lg text-center" style={{ border: '1px dashed var(--outline-variant)', borderRadius: '12px' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>No scheduling slots configured yet.</p>
+            </div>
+          )}
         </div>
 
         {/* Form Actions */}

@@ -67,7 +67,7 @@ export default function DoctorPatientDetail() {
         setRecords([newRecord, ...records]);
         toast.success('Record added');
       }
-      
+
       setShowForm(false);
       setEditRecordId(null);
       setForm({ title: '', type: 'prescription', description: '' });
@@ -231,7 +231,7 @@ export default function DoctorPatientDetail() {
                           <span style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.originalName || 'Medical File'}</span>
                           <div className="flex gap-xs">
                             <a href={file.url} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ padding: '2px', color: 'var(--primary)' }}><HiOutlineEye /></a>
-                            <a href={file.url} download className="btn btn-ghost btn-sm" style={{ padding: '2px' }}><HiOutlineDownload /></a>
+                            <a href={file.url} download className="btn btn-ghost btn-sm" style={{ padding: '2px' }}></a>
                           </div>
                         </div>
                       ))}
@@ -266,7 +266,7 @@ export default function DoctorPatientDetail() {
                   <div className="input-group">
                     <label>Type</label>
                     <select className="input" value={form.type} onChange={e => setForm({...form, type: e.target.value})}>
-                      <option value="prescription">Prescription</option><option value="diagnosis">Diagnosis</option><option value="lab-result">Lab Result</option><option value="other">Other</option>
+                      <option value="prescription">Prescription</option><option value="lab-result">Lab Result</option><option value="other">Other</option>
                     </select>
                   </div>
                 </div>
@@ -312,7 +312,7 @@ export default function DoctorPatientDetail() {
                             </div>
                             <div className="flex gap-xs">
                               <a href={file.url} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ padding: '4px', color: 'var(--primary)' }}><HiOutlineEye /></a>
-                              <a href={file.url} download className="btn btn-ghost btn-sm" style={{ padding: '4px' }}><HiOutlineDownload /></a>
+                              <a href={file.url} download className="btn btn-ghost btn-sm" style={{ padding: '4px' }}></a>
                             </div>
                           </div>
                         ))}

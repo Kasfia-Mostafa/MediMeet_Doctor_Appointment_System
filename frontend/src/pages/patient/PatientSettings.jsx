@@ -7,9 +7,40 @@ import {
   HiOutlineMap, HiOutlinePhone, HiOutlineCamera, HiOutlineIdentification,
   HiOutlineHeart, HiOutlineMail, HiOutlineSave, HiOutlineChatAlt2,
   HiStar, HiOutlineStar, HiOutlinePencil, HiOutlineTrash,
-  HiOutlineExclamationCircle
+  HiOutlineExclamationCircle, HiOutlineEye, HiOutlineEyeOff
 } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
+
+// Shared Password Input Component
+const PasswordInput = ({ label, value, onChange, field, showPw, setShowPw }) => (
+  <div className="input-group">
+    <label style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px', display: 'block', color: 'var(--text-secondary)' }}>{label}</label>
+    <div style={{ position: 'relative' }}>
+      <input
+        type={showPw[field] ? "text" : "password"}
+        className="input"
+        value={value}
+        onChange={onChange}
+        required
+        style={{ 
+          borderRadius: '16px', height: '54px', border: '1.5px solid var(--outline-variant)', 
+          background: 'var(--surface-container-lowest)', paddingRight: '48px' 
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => setShowPw(prev => ({ ...prev, [field]: !prev[field] }))}
+        style={{
+          position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)',
+          background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px'
+        }}
+      >
+        {showPw[field] ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+      </button>
+    </div>
+  </div>
+);
 
 export default function PatientSettings() {
   const { user, updateUser } = useAuth();
@@ -42,6 +73,7 @@ export default function PatientSettings() {
     newPassword: '',
     confirmPassword: ''
   });
+  const [showPw, setShowPw] = useState({ current: false, new: false, confirm: false });
 
   // Delete Modal State
   const [deletingReviewId, setDeletingReviewId] = useState(null);
@@ -477,35 +509,32 @@ export default function PatientSettings() {
                     <h3 style={{ fontSize: '20px', fontWeight: 800 }}>Update Password</h3>
                   </div>
 
-                  <div className="input-group">
-                    <label style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px', display: 'block', color: 'var(--text-secondary)' }}>Current Password</label>
-                    <input
-                      type="password" className="input"
-                      value={pwForm.currentPassword}
-                      onChange={e => setPwForm({...pwForm, currentPassword: e.target.value})}
-                      required style={{ borderRadius: '16px', height: '54px', border: '1.5px solid var(--outline-variant)', background: 'var(--surface-container-lowest)' }}
-                    />
-                  </div>
-
+                  <PasswordInput 
+                    label="Current Password" 
+                    field="current"
+                    value={pwForm.currentPassword}
+                    onChange={e => setPwForm({...pwForm, currentPassword: e.target.value})}
+                    showPw={showPw}
+                    setShowPw={setShowPw}
+                  />
+                  
                   <div className="grid grid-2" style={{ gap: '24px', marginTop: '24px' }}>
-                    <div className="input-group">
-                      <label style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px', display: 'block', color: 'var(--text-secondary)' }}>New Password</label>
-                      <input
-                        type="password" className="input"
-                        value={pwForm.newPassword}
-                        onChange={e => setPwForm({...pwForm, newPassword: e.target.value})}
-                        required style={{ borderRadius: '16px', height: '54px', border: '1.5px solid var(--outline-variant)', background: 'var(--surface-container-lowest)' }}
-                      />
-                    </div>
-                    <div className="input-group">
-                      <label style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px', display: 'block', color: 'var(--text-secondary)' }}>Confirm New Password</label>
-                      <input
-                        type="password" className="input"
-                        value={pwForm.confirmPassword}
-                        onChange={e => setPwForm({...pwForm, confirmPassword: e.target.value})}
-                        required style={{ borderRadius: '16px', height: '54px', border: '1.5px solid var(--outline-variant)', background: 'var(--surface-container-lowest)' }}
-                      />
-                    </div>
+                    <PasswordInput 
+                      label="New Password" 
+                      field="new"
+                      value={pwForm.newPassword}
+                      onChange={e => setPwForm({...pwForm, newPassword: e.target.value})}
+                      showPw={showPw}
+                      setShowPw={setShowPw}
+                    />
+                    <PasswordInput 
+                      label="Confirm New Password" 
+                      field="confirm"
+                      value={pwForm.confirmPassword}
+                      onChange={e => setPwForm({...pwForm, confirmPassword: e.target.value})}
+                      showPw={showPw}
+                      setShowPw={setShowPw}
+                    />
                   </div>
 
                   <div style={{ marginTop: '48px', display: 'flex', justifyContent: 'center' }}>

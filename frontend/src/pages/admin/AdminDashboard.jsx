@@ -66,7 +66,7 @@ export default function AdminDashboard() {
           {stats.recentUsers?.map(u => (
             <div key={u._id} className="flex items-center justify-between" style={{ padding: '12px 0', borderBottom: '1px solid var(--surface-container-high)' }}>
               <div className="flex items-center gap-md">
-                <div className="avatar avatar-sm">{u.name.charAt(0)}</div>
+                <div className="avatar avatar-sm">{u.name?.charAt(0)}</div>
                 <div><div style={{fontWeight:600,fontSize:'14px'}}>{u.name}</div><div style={{fontSize:'13px',color:'var(--text-muted)'}}>{u.email}</div></div>
               </div>
               <span className="chip chip-confirmed">{u.role}</span>

@@ -75,7 +75,7 @@ export default function Sidebar() {
     {
       label: 'Care & Wellness',
       links: [
-        { to: '/patient/wellness', icon: <HiOutlineHeart />, label: 'Wellness Tracker' },
+        { to: '/patient/wellness', icon: <HiOutlineHeart />, label: 'Health Insight' },
         { to: '/patient/family', icon: <HiOutlineUsers />, label: 'Family Members' },
       ]
     },
