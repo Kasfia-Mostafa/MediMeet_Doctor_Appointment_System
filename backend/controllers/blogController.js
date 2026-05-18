@@ -21,10 +21,11 @@ const getBlog = async (req, res, next) => {
 
 const createBlog = async (req, res, next) => {
   try {
-    const { title, content, excerpt, category, tags, isPublished } = req.body;
+    const { title, content, excerpt, category, tags, isPublished, authorName } = req.body;
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const blog = await Blog.create({
       title, slug, content, excerpt, category, author: req.user._id,
+      authorName: authorName || '',
       tags: tags ? tags.split(',').map(t => t.trim()) : [],
       isPublished: isPublished === 'true' || isPublished === true,
       coverImage: req.file ? req.file.path : '',

@@ -60,13 +60,6 @@ export default function BlogDetails() {
           </h1>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '32px', borderBottom: '1px solid var(--outline-variant)' }}>
-            <div className="avatar avatar-sm" style={{ border: '2px solid var(--primary-container)' }}>
-              {blog.author?.avatar ? (
-                <img src={blog.author.avatar} alt={blog.author.name} />
-              ) : (
-                <HiOutlineUser style={{ fontSize: '20px', color: 'var(--primary)' }} />
-              )}
-            </div>
             <div>
               <div style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '15px' }}>
                 {blog.authorName || blog.author?.name || 'Medical Team'}

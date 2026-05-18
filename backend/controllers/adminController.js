@@ -375,7 +375,7 @@ const getBlogs = async (req, res, next) => {
 
 const createBlog = async (req, res, next) => {
   try {
-    const { title, content, excerpt, category, isPublished } = req.body;
+    const { title, content, excerpt, category, isPublished, authorName } = req.body;
     const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') + '-' + Date.now();
 
     const blog = await Blog.create({
@@ -386,6 +386,7 @@ const createBlog = async (req, res, next) => {
       category,
       isPublished,
       author: req.user._id,
+      authorName: authorName || '',
       coverImage: req.file ? req.file.path : ''
     });
 
@@ -406,7 +407,7 @@ const updateBlog = async (req, res, next) => {
     const blog = await Blog.findById(req.params.id);
     if (!blog) { res.status(404); throw new Error('Blog not found'); }
 
-    const { title, content, excerpt, category, isPublished } = req.body;
+    const { title, content, excerpt, category, isPublished, authorName } = req.body;
 
     if (title) {
       blog.title = title;
@@ -416,6 +417,7 @@ const updateBlog = async (req, res, next) => {
     if (excerpt) blog.excerpt = excerpt;
     if (category) blog.category = category;
     if (isPublished !== undefined) blog.isPublished = isPublished === 'true' || isPublished === true;
+    if (authorName !== undefined) blog.authorName = authorName;
 
     if (req.file) {
       blog.coverImage = req.file.path;

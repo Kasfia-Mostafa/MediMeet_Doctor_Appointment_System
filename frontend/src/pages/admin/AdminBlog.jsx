@@ -19,7 +19,8 @@ export default function AdminBlog() {
     excerpt: '',
     content: '',
     category: 'wellness',
-    isPublished: true
+    isPublished: true,
+    authorName: ''
   });
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -80,7 +81,7 @@ export default function AdminBlog() {
 
       setShowAdd(false);
       setEditingId(null);
-      setForm({ title: '', excerpt: '', content: '', category: 'wellness', isPublished: true });
+      setForm({ title: '', excerpt: '', content: '', category: 'wellness', isPublished: true, authorName: '' });
       setFile(null);
       setPreview(null);
       fetchBlogs();
@@ -96,7 +97,8 @@ export default function AdminBlog() {
       excerpt: blog.excerpt,
       content: blog.content,
       category: blog.category,
-      isPublished: blog.isPublished
+      isPublished: blog.isPublished,
+      authorName: blog.authorName || ''
     });
     setPreview(blog.coverImage);
     setShowAdd(true);
@@ -205,7 +207,7 @@ export default function AdminBlog() {
             if (showAdd) {
               setShowAdd(false);
               setEditingId(null);
-              setForm({ title: '', excerpt: '', content: '', category: 'wellness', isPublished: true });
+              setForm({ title: '', excerpt: '', content: '', category: 'wellness', isPublished: true, authorName: '' });
               setPreview(null);
               setFile(null);
             } else {
@@ -250,6 +252,16 @@ export default function AdminBlog() {
                   <option value="false">Draft</option>
                 </select>
               </div>
+            </div>
+
+            <div className="input-group">
+              <label>Author Name</label>
+              <input
+                className="input"
+                placeholder="e.g. Dr. Ayesha Siddiqua (leave empty to use default)"
+                value={form.authorName}
+                onChange={e => setForm({...form, authorName: e.target.value})}
+              />
             </div>
 
             <div className="input-group">

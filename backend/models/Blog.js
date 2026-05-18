@@ -9,6 +9,7 @@ const blogSchema = new mongoose.Schema(
     coverImage: { type: String, default: '' },
     coverImagePublicId: { type: String, default: '' },
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    authorName: { type: String, default: '' },
     category: {
       type: String,
       enum: ['wellness', 'nutrition', 'mental-health', 'fitness', 'medical-tips', 'news', 'other'],
