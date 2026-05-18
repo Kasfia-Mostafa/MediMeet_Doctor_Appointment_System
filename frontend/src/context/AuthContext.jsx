@@ -28,19 +28,19 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     const { data } = await API.post('/auth/login', { email, password });
     localStorage.setItem('accessToken', data.accessToken);
-    setUser(data.user);
+    await fetchUser();
     return data.user;
   };
 
   const register = async (formData) => {
     const { data } = await API.post('/auth/register', formData);
     localStorage.setItem('accessToken', data.accessToken);
-    setUser(data.user);
+    await fetchUser();
     return data.user;
   };
 
   const logout = async () => {
-    try { await API.post('/auth/logout'); } catch {}
+    try { await API.post('/auth/logout'); } catch { }
     localStorage.removeItem('accessToken');
     setUser(null);
     setDoctorProfile(null);

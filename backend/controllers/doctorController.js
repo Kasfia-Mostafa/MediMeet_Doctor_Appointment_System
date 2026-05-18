@@ -152,19 +152,39 @@ const updateSchedule = async (req, res, next) => {
       throw new Error('Doctor profile not found');
     }
 
-    const { availableDays, timeSlots, isAvailable, consultationFee, bio, languages, hospital, department } = req.body;
+    const { availableDays, timeSlots, isAvailable, consultationFee, bio, languages, hospital, department, specialization, qualification } = req.body;
 
-    if (availableDays) doctor.availableDays = availableDays;
-    if (timeSlots) doctor.timeSlots = timeSlots;
+    console.log('[updateSchedule Request]', {
+      doctorId: doctor._id,
+      userId: req.user._id,
+      availableDays,
+      timeSlots
+    });
+
+    if (availableDays !== undefined) {
+      doctor.availableDays = availableDays;
+      doctor.markModified('availableDays');
+    }
+    if (timeSlots !== undefined) {
+      doctor.timeSlots = timeSlots;
+      doctor.markModified('timeSlots');
+    }
     if (typeof isAvailable !== 'undefined') doctor.isAvailable = isAvailable;
-    if (consultationFee) doctor.consultationFee = consultationFee;
-    if (bio) doctor.bio = bio;
-    if (languages) doctor.languages = languages;
-    if (hospital) doctor.hospital = hospital;
-    if (department) doctor.department = department;
+    if (consultationFee !== undefined) doctor.consultationFee = consultationFee;
+    if (bio !== undefined) doctor.bio = bio;
+    if (languages !== undefined) doctor.languages = languages;
+    if (hospital !== undefined) doctor.hospital = hospital;
+    if (department !== undefined) doctor.department = department;
+    if (specialization !== undefined) doctor.specialization = specialization;
+    if (qualification !== undefined) doctor.qualification = qualification;
 
-    await doctor.save();
-    res.json(doctor);
+    const savedDoctor = await doctor.save();
+    console.log('[updateSchedule Success]', {
+      doctorId: savedDoctor._id,
+      availableDays: savedDoctor.availableDays,
+      timeSlots: savedDoctor.timeSlots
+    });
+    res.json(savedDoctor);
   } catch (error) {
     next(error);
   }

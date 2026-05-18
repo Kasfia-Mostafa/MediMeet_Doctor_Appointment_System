@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import API from '../../api/axios';
-import { HiOutlineCalendar, HiOutlineArrowLeft, HiOutlineEye, HiOutlineUser } from 'react-icons/hi';
+import { HiOutlineCalendar, HiOutlineArrowLeft, HiOutlineUser } from 'react-icons/hi';
 import './Blog.css'; // Reuse blog styles
 
 export default function BlogDetails() {
@@ -44,7 +44,7 @@ export default function BlogDetails() {
           <Link to="/blog" className="blog-read-link" style={{ marginBottom: '24px', display: 'inline-flex' }}>
             <HiOutlineArrowLeft /> Back to Medical Articles
           </Link>
-          
+
           <div className="blog-meta" style={{ marginBottom: '16px' }}>
             {blog.category && (
               <span className="blog-category-tag">{blog.category.replace('-', ' ')}</span>
@@ -52,9 +52,6 @@ export default function BlogDetails() {
             <span className="blog-date">
               <HiOutlineCalendar />
               {new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-            </span>
-            <span className="blog-views">
-              <HiOutlineEye /> {blog.views || 0} views
             </span>
           </div>
 
@@ -72,7 +69,7 @@ export default function BlogDetails() {
             </div>
             <div>
               <div style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '15px' }}>
-                {blog.author?.name || 'Medical Team'}
+                {blog.authorName || blog.author?.name || 'Medical Team'}
               </div>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                 Author
@@ -86,9 +83,9 @@ export default function BlogDetails() {
       {blog.coverImage && (
         <div className="container" style={{ marginTop: '40px', marginBottom: '40px' }}>
           <div style={{ maxWidth: '1000px', margin: '0 auto', borderRadius: '24px', overflow: 'hidden', maxHeight: '500px' }}>
-            <img 
-              src={blog.coverImage} 
-              alt={blog.title} 
+            <img
+              src={blog.coverImage}
+              alt={blog.title}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </div>
@@ -97,16 +94,16 @@ export default function BlogDetails() {
 
       {/* Article Content */}
       <div className="container">
-        <div 
-          className="blog-content" 
-          style={{ 
-            maxWidth: '800px', 
-            margin: '0 auto', 
-            fontSize: '18px', 
-            lineHeight: '1.8', 
-            color: 'var(--text-secondary)' 
+        <div
+          className="blog-content"
+          style={{
+            maxWidth: '800px',
+            margin: '0 auto',
+            fontSize: '18px',
+            lineHeight: '1.8',
+            color: 'var(--text-secondary)'
           }}
-          dangerouslySetInnerHTML={{ __html: blog.content }} 
+          dangerouslySetInnerHTML={{ __html: blog.content }}
         />
       </div>
     </div>

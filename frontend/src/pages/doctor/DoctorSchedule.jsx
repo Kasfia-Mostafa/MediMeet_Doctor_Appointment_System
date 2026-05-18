@@ -6,21 +6,57 @@ import { HiOutlineCalendar, HiOutlineClock } from 'react-icons/hi';
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
+const TIME_OPTIONS = (() => {
+  const options = [];
+  for (let hour = 0; hour < 24; hour++) {
+    const hh = String(hour).padStart(2, '0');
+    options.push(`${hh}:00`);
+    options.push(`${hh}:30`);
+  }
+  return options;
+})();
+
 export default function DoctorSchedule() {
   const { doctorProfile, fetchUser } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('appointments');
-  
+
   // Schedule settings state
   const [availableDays, setAvailableDays] = useState(doctorProfile?.availableDays || []);
   const [timeSlots, setTimeSlots] = useState(doctorProfile?.timeSlots || []);
-  const [newSlot, setNewSlot] = useState({ day: 'monday', startTime: '', endTime: '' });
+  const [newSlot, setNewSlot] = useState({ day: doctorProfile?.availableDays?.[0] || 'monday', startTime: '09:00', endTime: '17:00' });
+
+  // Sync local state when doctorProfile updates
+  useEffect(() => {
+    if (doctorProfile) {
+      setAvailableDays(doctorProfile.availableDays || []);
+      setTimeSlots(doctorProfile.timeSlots || []);
+      setNewSlot(prev => ({ ...prev, day: doctorProfile.availableDays?.[0] || prev.day }));
+    }
+  }, [doctorProfile]);
 
   useEffect(() => {
-    API.get('/appointments')
-      .then(({ data }) => setAppointments(data.appointments || []))
-      .catch(() => {})
+    setLoading(true);
+    Promise.all([
+      API.get('/appointments'),
+      API.get('/auth/me')
+    ])
+      .then(([{ data: apptData }, { data: meData }]) => {
+        setAppointments(apptData.appointments || []);
+        if (meData?.doctorProfile) {
+          setAvailableDays(meData.doctorProfile.availableDays || []);
+          setTimeSlots(meData.doctorProfile.timeSlots || []);
+          setNewSlot(prev => ({ 
+            ...prev, 
+            day: meData.doctorProfile.availableDays?.[0] || prev.day 
+          }));
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to fetch schedule/appointments on mount:', err);
+        toast.error('Failed to fetch schedule or appointments');
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -42,19 +78,29 @@ export default function DoctorSchedule() {
 
   const addSlot = () => {
     if (!newSlot.startTime || !newSlot.endTime) return toast.error('Enter start and end times');
+    if (availableDays.length === 0) return toast.error('Select at least one available day first');
     setTimeSlots([...timeSlots, { ...newSlot }]);
-    setNewSlot({ ...newSlot, startTime: '', endTime: '' });
+    setNewSlot({ ...newSlot, startTime: '09:00', endTime: '17:00' });
   };
-  
+
   const removeSlot = (index) => {
     setTimeSlots(timeSlots.filter((_, i) => i !== index));
   };
 
   const toggleDay = (day) => {
     if (availableDays.includes(day)) {
-      setAvailableDays(availableDays.filter(d => d !== day));
+      const updatedDays = availableDays.filter(d => d !== day);
+      setAvailableDays(updatedDays);
+      setTimeSlots(prev => prev.filter(slot => slot.day !== day));
+      if (newSlot.day === day) {
+        setNewSlot(prev => ({ ...prev, day: updatedDays[0] || '' }));
+      }
     } else {
-      setAvailableDays([...availableDays, day]);
+      const updatedDays = [...availableDays, day];
+      setAvailableDays(updatedDays);
+      if (updatedDays.length === 1) {
+        setNewSlot(prev => ({ ...prev, day }));
+      }
     }
   };
 
@@ -81,7 +127,7 @@ export default function DoctorSchedule() {
                 {appointments.map((a) => (
                   <tr key={a._id}>
                     <td><div className="flex items-center gap-sm"><div className="avatar avatar-sm">{a.patient?.name?.charAt(0)}</div>{a.patient?.name}</div></td>
-                    <td>{new Date(a.date).toLocaleDateString()} <br/><small style={{color:'var(--text-muted)'}}>{a.timeSlot}</small></td>
+                    <td>{new Date(a.date).toLocaleDateString()} <br /><small style={{ color: 'var(--text-muted)' }}>{a.timeSlot}</small></td>
                     <td style={{ textTransform: 'capitalize' }}>{a.type}</td>
                     <td>{a.reason}</td>
                     <td><span className={`chip chip-${a.status}`}>{a.status}</span></td>
@@ -116,33 +162,42 @@ export default function DoctorSchedule() {
           </div>
 
           <h4 style={{ marginBottom: '16px' }}>Time Slots</h4>
-          <div className="grid grid-4 mb-md" style={{ alignItems: 'end' }}>
-            <div className="input-group">
-              <label>Day</label>
-              <select className="input" value={newSlot.day} onChange={e => setNewSlot({...newSlot, day: e.target.value})}>
-                {DAYS.map(d => <option key={d} value={d} style={{ textTransform: 'capitalize' }}>{d}</option>)}
-              </select>
+          {availableDays.length === 0 ? (
+            <div style={{ padding: '24px', background: 'var(--surface-container-low)', borderRadius: '12px', textAlign: 'center', color: 'var(--text-muted)', marginBottom: '16px' }}>
+              <HiOutlineClock style={{ fontSize: '28px', opacity: 0.4, marginBottom: '8px' }} />
+              <p style={{ margin: 0, fontSize: '14px' }}>Select available days above to configure time slots</p>
             </div>
-            <div className="input-group"><label>Start Time</label><input type="time" className="input" value={newSlot.startTime} onChange={e => setNewSlot({...newSlot, startTime: e.target.value})} /></div>
-            <div className="input-group"><label>End Time</label><input type="time" className="input" value={newSlot.endTime} onChange={e => setNewSlot({...newSlot, endTime: e.target.value})} /></div>
-            <div className="input-group"><button className="btn btn-secondary btn-block" onClick={addSlot}>Add Slot</button></div>
-          </div>
+          ) : (
+            <>
+              <div className="grid grid-4 mb-md" style={{ alignItems: 'end' }}>
+                <div className="input-group">
+                  <label>Day</label>
+                  <select className="input" value={newSlot.day} onChange={e => setNewSlot({ ...newSlot, day: e.target.value })}>
+                    {availableDays.map(d => <option key={d} value={d} style={{ textTransform: 'capitalize' }}>{d}</option>)}
+                  </select>
+                </div>
+                <div className="input-group"><label>Start Time (24h)</label><select className="input" value={newSlot.startTime} onChange={e => setNewSlot({ ...newSlot, startTime: e.target.value })}>{TIME_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                <div className="input-group"><label>End Time (24h)</label><select className="input" value={newSlot.endTime} onChange={e => setNewSlot({ ...newSlot, endTime: e.target.value })}>{TIME_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                <div className="input-group"><button className="btn btn-secondary btn-block" onClick={addSlot}>Add Slot</button></div>
+              </div>
 
-          {timeSlots.length > 0 && (
-            <div className="table-wrapper mb-lg">
-              <table>
-                <thead><tr><th>Day</th><th>Time</th><th>Action</th></tr></thead>
-                <tbody>
-                  {timeSlots.map((ts, i) => (
-                    <tr key={i}>
-                      <td style={{ textTransform: 'capitalize' }}>{ts.day}</td>
-                      <td>{ts.startTime} - {ts.endTime}</td>
-                      <td><button className="btn btn-ghost btn-sm" style={{color:'var(--error)'}} onClick={() => removeSlot(i)}>Remove</button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+              {timeSlots.length > 0 && (
+                <div className="table-wrapper mb-lg">
+                  <table>
+                    <thead><tr><th>Day</th><th>Time</th><th>Action</th></tr></thead>
+                    <tbody>
+                      {timeSlots.filter(ts => availableDays.includes(ts.day)).map((ts, i) => (
+                        <tr key={i}>
+                          <td style={{ textTransform: 'capitalize' }}>{ts.day}</td>
+                          <td>{ts.startTime} - {ts.endTime}</td>
+                          <td><button className="btn btn-ghost btn-sm" style={{ color: 'var(--error)' }} onClick={() => removeSlot(timeSlots.indexOf(ts))}>Remove</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
           )}
 
           <button className="btn btn-primary" onClick={handleSaveSchedule}>Save Settings</button>

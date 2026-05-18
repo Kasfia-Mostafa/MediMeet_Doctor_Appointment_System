@@ -24,16 +24,16 @@ const getDashboard = async (req, res, next) => {
 
     const revenue = (totalRevenue && totalRevenue.length > 0) ? totalRevenue[0].total : 0;
 
-    res.json({ 
-      users, 
-      doctors, 
-      appointments, 
-      revenue, 
+    res.json({
+      users,
+      doctors,
+      appointments,
+      revenue,
       recentUsers,
       byStatus,
       bySpec
     });
-  } catch (error) { 
+  } catch (error) {
     res.status(500).json({ message: 'Internal server error while fetching dashboard stats', error: error.message });
   }
 };
@@ -45,15 +45,15 @@ const getStaff = async (req, res, next) => {
 
     let doctorQuery = {};
     if (search) {
-      const userIds = await User.find({ 
+      const userIds = await User.find({
         $or: [
           { name: new RegExp(search, 'i') },
           { email: new RegExp(search, 'i') }
         ],
-        role: 'doctor' 
+        role: 'doctor'
       }).select('_id');
       const ids = userIds.map(u => u._id);
-      
+
       doctorQuery = {
         $or: [
           { user: { $in: ids } },
@@ -70,9 +70,9 @@ const getStaff = async (req, res, next) => {
 
     const total = await Doctor.countDocuments(doctorQuery);
 
-    res.json({ 
-      doctors, 
-      total, 
+    res.json({
+      doctors,
+      total,
       pages: Math.ceil(total / limit),
       currentPage: parseInt(page)
     });
@@ -81,12 +81,12 @@ const getStaff = async (req, res, next) => {
 
 const addStaff = async (req, res, next) => {
   try {
-    const { 
-      name, email, password, role, phone, 
-      specialization, qualification, consultationFee, experience, 
-      hospital, location, isAvailable 
+    const {
+      name, email, password, role, phone,
+      specialization, qualification, consultationFee, experience,
+      hospital, location, isAvailable
     } = req.body;
-    
+
     let avatarUrl = '';
     let avatarPublicId = '';
     if (req.file) {
@@ -110,11 +110,11 @@ const addStaff = async (req, res, next) => {
         } catch (e) { days = []; }
       }
 
-      await Doctor.create({ 
-        user: user._id, 
-        specialization, 
-        qualification: qualification || '', 
-        consultationFee: Number(consultationFee) || 500, 
+      await Doctor.create({
+        user: user._id,
+        specialization,
+        qualification: qualification || '',
+        consultationFee: Number(consultationFee) || 500,
         experience: Number(experience) || 0,
         hospital: hospital || '',
         location: location || '',
@@ -130,10 +130,10 @@ const addStaff = async (req, res, next) => {
 const getStaffMember = async (req, res, next) => {
   try {
     const { id } = req.params;
-    
+
     // First, try to find by User ID (preferred for admin consistency)
     let doctor = await Doctor.findOne({ user: id }).populate('user', '-password');
-    
+
     // If not found by User ID, try to find directly by Doctor document ID
     if (!doctor) {
       doctor = await Doctor.findById(id).populate('user', '-password');
@@ -148,7 +148,7 @@ const getStaffMember = async (req, res, next) => {
 
       // If user is a doctor but has no profile document, create one on the fly
       if (user.role === 'doctor') {
-        doctor = await Doctor.create({ 
+        doctor = await Doctor.create({
           user: user._id,
           specialization: 'Not Specified',
           qualification: 'Not Specified',
@@ -162,7 +162,7 @@ const getStaffMember = async (req, res, next) => {
         return res.json({ user, role: user.role });
       }
     }
-    
+
     res.json(doctor);
   } catch (error) {
     console.error('getStaffMember Error:', error);
@@ -172,10 +172,10 @@ const getStaffMember = async (req, res, next) => {
 
 const updateStaff = async (req, res, next) => {
   try {
-    const { 
+    const {
       name, email, phone, role, password,
-      specialization, qualification, consultationFee, experience, 
-      hospital, location, isAvailable 
+      specialization, qualification, consultationFee, experience,
+      hospital, location, isAvailable
     } = req.body;
 
     const user = await User.findById(req.params.id);
@@ -185,7 +185,7 @@ const updateStaff = async (req, res, next) => {
     user.email = email || user.email;
     user.phone = phone !== undefined ? phone : user.phone;
     user.role = role || user.role;
-    
+
     if (password) {
       user.password = password;
     }
@@ -212,10 +212,10 @@ const updateStaff = async (req, res, next) => {
         } catch (e) { days = []; }
       }
 
-      const updateData = { 
-        specialization, 
-        qualification, 
-        consultationFee: Number(consultationFee), 
+      const updateData = {
+        specialization,
+        qualification,
+        consultationFee: Number(consultationFee),
         experience: Number(experience),
         hospital,
         location,
@@ -224,6 +224,10 @@ const updateStaff = async (req, res, next) => {
 
       if (req.body.timeSlots) {
         updateData.timeSlots = slots;
+      }
+
+      if (req.body.availableDays) {
+        updateData.availableDays = days;
       }
 
       await Doctor.findOneAndUpdate(
@@ -249,7 +253,7 @@ const deleteStaff = async (req, res, next) => {
     await Doctor.findOneAndDelete({ user: userId });
     // Remove the user record
     const user = await User.findByIdAndDelete(userId);
-    
+
     if (!user) { res.status(404); throw new Error('Staff not found'); }
     res.json({ message: 'Staff removed successfully' });
   } catch (error) { next(error); }
@@ -334,15 +338,15 @@ const updateUserRole = async (req, res, next) => {
     const { role } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) { res.status(404); throw new Error('User not found'); }
-    
+
     user.role = role;
     await user.save();
-    
+
     // If role is changed FROM doctor TO something else, delete Doctor record
     if (role !== 'doctor') {
       await Doctor.findOneAndDelete({ user: user._id });
     }
-    
+
     res.json(user);
   } catch (error) { next(error); }
 };
@@ -351,15 +355,15 @@ const getBlogs = async (req, res, next) => {
   try {
     const { page = 1, limit = 6 } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     const blogs = await Blog.find()
       .populate('author', 'name')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
-      
+
     const total = await Blog.countDocuments();
-    
+
     res.json({
       blogs,
       total,
@@ -373,7 +377,7 @@ const createBlog = async (req, res, next) => {
   try {
     const { title, content, excerpt, category, isPublished } = req.body;
     const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') + '-' + Date.now();
-    
+
     const blog = await Blog.create({
       title,
       slug,
@@ -384,7 +388,7 @@ const createBlog = async (req, res, next) => {
       author: req.user._id,
       coverImage: req.file ? req.file.path : ''
     });
-    
+
     res.status(201).json(blog);
   } catch (error) { next(error); }
 };
@@ -403,7 +407,7 @@ const updateBlog = async (req, res, next) => {
     if (!blog) { res.status(404); throw new Error('Blog not found'); }
 
     const { title, content, excerpt, category, isPublished } = req.body;
-    
+
     if (title) {
       blog.title = title;
       blog.slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') + '-' + Date.now();
@@ -412,7 +416,7 @@ const updateBlog = async (req, res, next) => {
     if (excerpt) blog.excerpt = excerpt;
     if (category) blog.category = category;
     if (isPublished !== undefined) blog.isPublished = isPublished === 'true' || isPublished === true;
-    
+
     if (req.file) {
       blog.coverImage = req.file.path;
     }
@@ -422,15 +426,15 @@ const updateBlog = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-module.exports = { 
-  getDashboard, 
-  getStaff, 
-  addStaff, 
-  updateStaff, 
-  deleteStaff, 
-  getInventory, 
-  addInventory, 
-  updateInventory, 
+module.exports = {
+  getDashboard,
+  getStaff,
+  addStaff,
+  updateStaff,
+  deleteStaff,
+  getInventory,
+  addInventory,
+  updateInventory,
   getAnalytics,
   getUsers,
   updateUserRole,

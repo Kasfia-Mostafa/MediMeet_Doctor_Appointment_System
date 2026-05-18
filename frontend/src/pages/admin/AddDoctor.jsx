@@ -2,13 +2,23 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
-import { 
-  HiOutlineUserAdd, HiOutlineMail, HiOutlineLockClosed, HiOutlinePhone, 
+import {
+  HiOutlineUserAdd, HiOutlineMail, HiOutlineLockClosed, HiOutlinePhone,
   HiOutlineAcademicCap, HiOutlineBriefcase, HiOutlineCurrencyBangladeshi,
   HiOutlineStar, HiOutlineUser, HiOutlineBadgeCheck, HiOutlineCamera, HiOutlineStatusOnline,
   HiOutlineClock, HiOutlineTrash, HiOutlineCalendar, HiOutlinePlus,
   HiOutlineEye, HiOutlineEyeOff
 } from 'react-icons/hi';
+
+const TIME_OPTIONS = (() => {
+  const options = [];
+  for (let hour = 0; hour < 24; hour++) {
+    const hh = String(hour).padStart(2, '0');
+    options.push(`${hh}:00`);
+    options.push(`${hh}:30`);
+  }
+  return options;
+})();
 
 export default function AddDoctor() {
   const [form, setForm] = useState({
@@ -26,7 +36,8 @@ export default function AddDoctor() {
     status: 'Active',
     timeSlots: [],
   });
-  const [newSlot, setNewSlot] = useState({ day: 'monday', startTime: '09:00', endTime: '13:00', maxPatients: 10 });
+  const [newSlot, setNewSlot] = useState({ day: 'monday', startTime: '09:00', endTime: '17:00', maxPatients: 10 });
+  const [availableDays, setAvailableDays] = useState([]);
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -37,13 +48,36 @@ export default function AddDoctor() {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const addSlot = () => {
-    setForm({ ...form, timeSlots: [...form.timeSlots, newSlot] });
+    if (!newSlot.startTime || !newSlot.endTime) return toast.error('Enter start and end times');
+    if (availableDays.length === 0) return toast.error('Select at least one available day first');
+    setForm(prev => ({ ...prev, timeSlots: [...prev.timeSlots, { ...newSlot }] }));
+    setNewSlot(prev => ({ ...prev, startTime: '09:00', endTime: '17:00' }));
   };
 
   const removeSlot = (index) => {
     const slots = [...form.timeSlots];
     slots.splice(index, 1);
     setForm({ ...form, timeSlots: slots });
+  };
+
+  const toggleDay = (day) => {
+    if (availableDays.includes(day)) {
+      const updatedDays = availableDays.filter(d => d !== day);
+      setAvailableDays(updatedDays);
+      setForm(prev => ({
+        ...prev,
+        timeSlots: prev.timeSlots.filter(slot => slot.day !== day)
+      }));
+      if (newSlot.day === day) {
+        setNewSlot(prev => ({ ...prev, day: updatedDays[0] || '' }));
+      }
+    } else {
+      const updatedDays = [...availableDays, day];
+      setAvailableDays(updatedDays);
+      if (updatedDays.length === 1) {
+        setNewSlot(prev => ({ ...prev, day }));
+      }
+    }
   };
 
   const handleFileChange = (e) => {
@@ -57,7 +91,7 @@ export default function AddDoctor() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     const formData = new FormData();
     Object.keys(form).forEach(key => {
       if (key === 'status') {
@@ -68,7 +102,9 @@ export default function AddDoctor() {
         formData.append(key, form[key]);
       }
     });
-    
+
+    formData.append('availableDays', JSON.stringify(availableDays));
+
     if (avatar) {
       formData.append('avatar', avatar);
     }
@@ -98,19 +134,19 @@ export default function AddDoctor() {
             <HiOutlineUser style={{ fontSize: '24px', color: 'var(--primary)' }} />
             <h3 style={{ margin: 0 }}>Account Information</h3>
           </div>
-          
+
           <div className="flex flex-col items-center mb-lg">
-            <div 
-              className="avatar-upload" 
+            <div
+              className="avatar-upload"
               onClick={() => fileInputRef.current.click()}
               style={{
-                width: '100px', 
-                height: '100px', 
-                borderRadius: '50%', 
-                backgroundColor: 'var(--surface-container-highest)', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+                width: '100px',
+                height: '100px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--surface-container-highest)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 cursor: 'pointer',
                 overflow: 'hidden',
                 position: 'relative',
@@ -126,12 +162,12 @@ export default function AddDoctor() {
                 </div>
               )}
             </div>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleFileChange} 
-              accept="image/*" 
-              style={{ display: 'none' }} 
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              style={{ display: 'none' }}
             />
           </div>
 
@@ -157,17 +193,17 @@ export default function AddDoctor() {
               <label>Password</label>
               <div style={{ position: 'relative' }}>
                 <HiOutlineLockClosed style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input 
-                  type={showPass ? "text" : "password"} 
-                  name="password" 
-                  className="input" 
-                  placeholder="••••••••" 
-                  value={form.password} 
-                  onChange={handleChange} 
-                  required 
-                  style={{ paddingLeft: '40px', paddingRight: '40px' }} 
+                <input
+                  type={showPass ? "text" : "password"}
+                  name="password"
+                  className="input"
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  style={{ paddingLeft: '40px', paddingRight: '40px' }}
                 />
-                <button 
+                <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
                   style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
@@ -243,7 +279,7 @@ export default function AddDoctor() {
               </div>
             </div>
           </div>
-          
+
           <div className="input-group" style={{ maxWidth: '300px' }}>
             <label>Status</label>
             <div style={{ position: 'relative' }}>
@@ -260,88 +296,77 @@ export default function AddDoctor() {
         <div className="card mb-lg" style={{ padding: '32px' }}>
           <div className="flex items-center gap-sm mb-lg" style={{ borderBottom: '1px solid var(--outline-variant)', paddingBottom: '16px' }}>
             <HiOutlineCalendar style={{ fontSize: '24px', color: 'var(--primary)' }} />
-            <h3 style={{ margin: 0 }}>Weekly Scheduling Slots</h3>
+            <h3 style={{ margin: 0 }}>Weekly Scheduling Slots ({form.timeSlots?.filter(ts => availableDays.includes(ts.day)).length || 0})</h3>
           </div>
 
-
-
-          <div style={{ background: 'var(--surface-container-low)', padding: '24px', borderRadius: '20px' }}>
-            <h4 style={{ margin: '0 0 16px 0', fontSize: '15px' }}>Add Scheduling Slots</h4>
-            <div className="grid grid-3 items-end" style={{ gap: '16px' }}>
-              <div className="input-group" style={{ margin: 0 }}>
-                <label style={{ fontSize: '12px' }}>Day</label>
-                <select 
-                  className="input" 
-                  value={newSlot.day} 
-                  onChange={e => setNewSlot({...newSlot, day: e.target.value})}
-                >
-                  {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(d => (
-                    <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="input-group" style={{ margin: 0 }}>
-                <label style={{ fontSize: '12px' }}>Start Time</label>
-                <input 
-                  type="time" 
-                  className="input" 
-                  value={newSlot.startTime} 
-                  onChange={e => setNewSlot({...newSlot, startTime: e.target.value})}
-                />
-              </div>
-              <div className="input-group" style={{ margin: 0 }}>
-                <label style={{ fontSize: '12px' }}>End Time</label>
-                <input 
-                  type="time" 
-                  className="input" 
-                  value={newSlot.endTime} 
-                  onChange={e => setNewSlot({...newSlot, endTime: e.target.value})}
-                />
-              </div>
-            </div>
-            <button 
-              type="button" 
-              className="btn btn-secondary mt-md" 
-              onClick={addSlot}
-              style={{ width: '100%', borderStyle: 'dashed' }}
-            >
-              <HiOutlinePlus /> Add This Slot
-            </button>
+          <h4 style={{ marginBottom: '16px' }}>Available Days</h4>
+          <div className="flex flex-wrap gap-sm mb-lg">
+            {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => (
+              <button key={day} type="button" className={`btn btn-sm ${availableDays.includes(day) ? 'btn-primary' : 'btn-secondary'}`} onClick={() => toggleDay(day)} style={{ textTransform: 'capitalize' }}>
+                {day}
+              </button>
+            ))}
           </div>
 
-          {form.timeSlots.length > 0 && (
-            <div className="mt-lg">
-              <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', color: 'var(--text-muted)' }}>Current Slots</h4>
-              <div className="flex flex-col gap-sm">
-                {form.timeSlots.map((slot, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-center justify-between"
-                    style={{ 
-                      padding: '12px 20px', 
-                      background: 'var(--surface-container-lowest)', 
-                      borderRadius: '12px',
-                      border: '1px solid var(--outline-variant)'
-                    }}
-                  >
-                    <div className="flex items-center gap-md">
-                      <span style={{ fontWeight: 700, textTransform: 'capitalize', minWidth: '80px' }}>{slot.day}</span>
-                      <div className="flex items-center gap-xs" style={{ color: 'var(--primary)' }}>
-                        <HiOutlineClock />
-                        <span style={{ fontWeight: 600 }}>{slot.startTime} - {slot.endTime}</span>
-                      </div>
-                    </div>
-                    <button 
-                      type="button" 
-                      onClick={() => removeSlot(index)}
-                      style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer' }}
-                    >
-                      <HiOutlineTrash />
-                    </button>
-                  </div>
-                ))}
-              </div>
+          <h4 style={{ marginBottom: '16px' }}>Time Slots</h4>
+          {availableDays.length === 0 ? (
+            <div style={{ padding: '24px', background: 'var(--surface-container-low)', borderRadius: '12px', textAlign: 'center', color: 'var(--text-muted)', marginBottom: '16px' }}>
+              <HiOutlineClock style={{ fontSize: '28px', opacity: 0.4, marginBottom: '8px' }} />
+              <p style={{ margin: 0, fontSize: '14px' }}>Select available days above to configure time slots</p>
             </div>
+          ) : (
+            <>
+              <div className="grid grid-4 mb-md" style={{ alignItems: 'end' }}>
+                <div className="input-group" style={{ margin: 0 }}>
+                  <label>Day</label>
+                  <select className="input" value={newSlot.day} onChange={e => setNewSlot({ ...newSlot, day: e.target.value })}>
+                    {availableDays.map(d => <option key={d} value={d} style={{ textTransform: 'capitalize' }}>{d}</option>)}
+                  </select>
+                </div>
+                <div className="input-group" style={{ margin: 0 }}>
+                  <label>Start Time (24h)</label>
+                  <input type="time" className="input" value={newSlot.startTime} onChange={e => setNewSlot({ ...newSlot, startTime: e.target.value })} />
+                </div>
+                <div className="input-group" style={{ margin: 0 }}>
+                  <label>End Time (24h)</label>
+                  <input type="time" className="input" value={newSlot.endTime} onChange={e => setNewSlot({ ...newSlot, endTime: e.target.value })} />
+                </div>
+                <div className="input-group" style={{ margin: 0 }}>
+                  <button type="button" className="btn btn-secondary btn-block" onClick={addSlot}>Add Slot</button>
+                </div>
+              </div>
+
+              {form.timeSlots.filter(ts => availableDays.includes(ts.day)).length > 0 ? (
+                <div className="table-wrapper mb-lg">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {form.timeSlots.filter(ts => availableDays.includes(ts.day)).map((ts, i) => (
+                        <tr key={i}>
+                          <td style={{ textTransform: 'capitalize' }}>{ts.day}</td>
+                          <td>{ts.startTime} - {ts.endTime}</td>
+                          <td>
+                            <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--error)' }} onClick={() => removeSlot(form.timeSlots.indexOf(ts))}>
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="mt-lg p-lg text-center" style={{ border: '1px dashed var(--outline-variant)', borderRadius: '12px' }}>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>No scheduling slots configured yet.</p>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -355,5 +380,3 @@ export default function AddDoctor() {
     </div>
   );
 }
-
-

@@ -69,26 +69,39 @@ export default function BookAppointment() {
   // Fetch slots
   useEffect(() => {
     if (selectedDoctor && form.date) {
-      if (doctorInfo && doctorInfo.availableDays && doctorInfo.availableDays.length > 0) {
-        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-        const dateObj = new Date(form.date);
-        const dayOfWeek = days[dateObj.getDay()];
-        if (!doctorInfo.availableDays.includes(dayOfWeek)) {
-          setDateError(`Doctor is only available on: ${doctorInfo.availableDays.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}`);
-          setSlots([]);
-          setPatientBusy([]);
-          return;
-        }
-      }
-      setDateError('');
-      const params = { date: form.date };
-      if (user?._id) params.patientId = user._id;
+      // Fetch latest doctor info to guarantee we always have the updated schedule
+      API.get(`/doctors/${selectedDoctor}`)
+        .then(({ data: docData }) => {
+          setDoctorInfo(docData);
 
-      API.get(`/doctors/${selectedDoctor}/slots`, { params })
-        .then(({ data }) => {
-          setSlots(data.slots || []);
-          setPatientBusy(data.patientBusy || []);
-          setBookedSlots(data.bookedSlots || []);
+          if (docData && docData.availableDays && docData.availableDays.length > 0) {
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const [year, month, day] = form.date.split('-').map(Number);
+            const dateObj = new Date(Date.UTC(year, month - 1, day));
+            const dayOfWeek = days[dateObj.getUTCDay()];
+            if (!docData.availableDays.includes(dayOfWeek)) {
+              setDateError(`Doctor is only available on: ${docData.availableDays.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')}`);
+              setSlots([]);
+              setPatientBusy([]);
+              return;
+            }
+          }
+
+          setDateError('');
+          const params = { date: form.date };
+          if (user?._id) params.patientId = user._id;
+
+          API.get(`/doctors/${selectedDoctor}/slots`, { params })
+            .then(({ data }) => {
+              setSlots(data.slots || []);
+              setPatientBusy(data.patientBusy || []);
+              setBookedSlots(data.bookedSlots || []);
+            })
+            .catch(() => {
+              setSlots([]);
+              setPatientBusy([]);
+              setBookedSlots([]);
+            });
         })
         .catch(() => {
           setSlots([]);
@@ -96,7 +109,7 @@ export default function BookAppointment() {
           setBookedSlots([]);
         });
     }
-  }, [selectedDoctor, form.date, doctorInfo]);
+  }, [selectedDoctor, form.date, user?._id]);
 
   // File handling
   const validateFile = (file) => {

@@ -10,7 +10,7 @@ import {
 } from 'react-icons/hi';
 
 export default function DoctorSettings() {
-  const { user, doctorProfile, updateUser } = useAuth();
+  const { user, doctorProfile, updateUser, fetchUser } = useAuth();
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
@@ -70,8 +70,9 @@ export default function DoctorSettings() {
     setLoading(true);
     try {
       const { data: updatedUser } = await API.put('/users/profile', form);
-      const { data: updatedDoc } = await API.put('/doctors/schedule', docForm);
+      await API.put('/doctors/schedule', docForm);
       updateUser(updatedUser);
+      await fetchUser();
       toast.success('Profile information updated');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Update failed');

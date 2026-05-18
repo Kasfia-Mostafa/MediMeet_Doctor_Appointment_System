@@ -62,8 +62,8 @@ export default function PatientSettings() {
     },
     emergencyContact: {
       name: user?.emergencyContact?.name || '',
-      phone: user?.emergencyContact?.phone || '',
-      relationship: user?.emergencyContact?.relationship || ''
+      phone: user?.emergencyContact?.phone?.startsWith('+880') ? user.emergencyContact.phone.slice(4) : (user?.emergencyContact?.phone || ''),
+      relation: user?.emergencyContact?.relation || ''
     }
   });
 
@@ -105,7 +105,14 @@ export default function PatientSettings() {
     e.preventDefault();
     setLoading(true);
     try {
-      const updateData = { ...form, phone: form.phone ? `+880${form.phone}` : '' };
+      const updateData = { 
+        ...form, 
+        phone: form.phone ? `+880${form.phone}` : '',
+        emergencyContact: {
+          ...form.emergencyContact,
+          phone: form.emergencyContact.phone ? `+880${form.emergencyContact.phone}` : ''
+        }
+      };
       const { data } = await API.put('/users/profile', updateData);
       updateUser(data);
       toast.success('Profile updated successfully');
@@ -363,6 +370,44 @@ export default function PatientSettings() {
                           <option value="female">Female</option>
                           <option value="other">Other</option>
                         </select>
+                      </div>
+                    </div>
+
+                    {/* Emergency Contact Subsection */}
+                    <div style={{ marginTop: '40px', borderTop: '1px dashed var(--outline-variant)', paddingTop: '32px' }}>
+                      <h4 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <HiOutlinePhone style={{ color: 'var(--primary)' }} size={20} /> Emergency Contact Information
+                      </h4>
+                      <div className="grid grid-2" style={{ gap: '24px' }}>
+                        <div className="input-group">
+                          <label style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px', display: 'block', color: 'var(--text-secondary)' }}>Contact Name</label>
+                          <input
+                            className="input" 
+                            value={form.emergencyContact.name}
+                            onChange={e => setForm({
+                              ...form,
+                              emergencyContact: { ...form.emergencyContact, name: e.target.value }
+                            })}
+                            placeholder="e.g. Spouse, Parent Name"
+                            style={{ height: '54px', borderRadius: '16px', border: '1.5px solid var(--outline-variant)', background: 'var(--surface-container-lowest)' }}
+                          />
+                        </div>
+                        <div className="input-group">
+                          <label style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px', display: 'block', color: 'var(--text-secondary)' }}>Contact Phone</label>
+                          <div className="phone-input-wrapper" style={{ height: '54px' }}>
+                            <span className="phone-prefix">+880</span>
+                            <input
+                              className="input" 
+                              style={{ border: 'none', borderRadius: 0, flex: 1, paddingLeft: '12px' }}
+                              value={form.emergencyContact.phone} 
+                              onChange={e => setForm({
+                                ...form,
+                                emergencyContact: { ...form.emergencyContact, phone: e.target.value }
+                              })}
+                              placeholder="1XXX-XXXXXX"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

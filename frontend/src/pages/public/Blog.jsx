@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
-import { HiOutlineCalendar, HiOutlineEye, HiOutlineArrowRight, HiOutlineClock, HiOutlineUser } from 'react-icons/hi';
+import { HiOutlineCalendar, HiOutlineArrowRight, HiOutlineClock, HiOutlineUser } from 'react-icons/hi';
 import './Blog.css';
 
 const categories = ['All', 'wellness', 'nutrition', 'mental-health', 'fitness', 'medical-tips', 'news', 'other'];
@@ -57,8 +57,8 @@ export default function Blog() {
         <div className="container">
           <div className="blog-tabs">
             {categories.map(cat => (
-              <button 
-                key={cat} 
+              <button
+                key={cat}
                 className={`blog-tab ${activeCategory === cat ? 'active' : ''}`}
                 onClick={() => handleCategoryChange(cat)}
               >
@@ -96,7 +96,7 @@ export default function Blog() {
                       <span className="blog-category-tag">{blogs[0].category.replace('-', ' ')}</span>
                       <span className="blog-date" style={{ marginRight: '8px' }}>
                         <HiOutlineUser />
-                        {blogs[0].author?.name || 'Medical Team'}
+                        {blogs[0].authorName || blogs[0].author?.name || 'Medical Team'}
                       </span>
                       <span className="blog-date">
                         <HiOutlineCalendar />
@@ -108,9 +108,6 @@ export default function Blog() {
                     <div className="blog-featured-footer">
                       <span className="blog-read-link">
                         Read Full Article <HiOutlineArrowRight />
-                      </span>
-                      <span className="blog-views">
-                        <HiOutlineEye /> {blogs[0].views || 0} views
                       </span>
                     </div>
                   </div>
@@ -131,7 +128,7 @@ export default function Blog() {
                         <span className="blog-category-tag">{blog.category.replace('-', ' ')}</span>
                         <span className="blog-date" style={{ marginRight: '8px' }}>
                           <HiOutlineUser />
-                          {blog.author?.name || 'Medical Team'}
+                          {blog.authorName || blog.author?.name || 'Medical Team'}
                         </span>
                         <span className="blog-date">
                           <HiOutlineCalendar />
@@ -144,9 +141,6 @@ export default function Blog() {
                         <span className="blog-read-link">
                           Read More <HiOutlineArrowRight />
                         </span>
-                        <span className="blog-views">
-                          <HiOutlineEye /> {blog.views || 0}
-                        </span>
                       </div>
                     </div>
                   </Link>
@@ -155,24 +149,24 @@ export default function Blog() {
 
               {totalPages > 1 && (
                 <div className="pagination">
-                  <button 
-                    disabled={page === 1} 
+                  <button
+                    disabled={page === 1}
                     onClick={() => setPage(p => p - 1)}
                     style={{ width: 'auto', padding: '0 16px' }}
                   >
                     Previous
                   </button>
                   {[...Array(totalPages)].map((_, i) => (
-                    <button 
-                      key={i + 1} 
-                      className={page === i + 1 ? 'active' : ''} 
+                    <button
+                      key={i + 1}
+                      className={page === i + 1 ? 'active' : ''}
                       onClick={() => setPage(i + 1)}
                     >
                       {i + 1}
                     </button>
                   ))}
-                  <button 
-                    disabled={page === totalPages} 
+                  <button
+                    disabled={page === totalPages}
                     onClick={() => setPage(p => p + 1)}
                     style={{ width: 'auto', padding: '0 16px' }}
                   >

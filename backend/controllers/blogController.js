@@ -15,7 +15,6 @@ const getBlog = async (req, res, next) => {
   try {
     const blog = await Blog.findById(req.params.id).populate('author', 'name avatar');
     if (!blog) { res.status(404); throw new Error('Blog post not found'); }
-    blog.views += 1; await blog.save();
     res.json(blog);
   } catch (error) { next(error); }
 };

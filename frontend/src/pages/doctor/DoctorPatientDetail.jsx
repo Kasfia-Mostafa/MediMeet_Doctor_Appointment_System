@@ -39,6 +39,24 @@ export default function DoctorPatientDetail() {
     fetchAll();
   }, [id]);
 
+  const handleDownload = async (url, filename) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename || 'medical-file';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download error:', error);
+      window.open(url, '_blank');
+    }
+  };
+
   const handleSaveRecord = async (e) => {
     e.preventDefault();
     try {
@@ -230,8 +248,10 @@ export default function DoctorPatientDetail() {
                           <HiOutlinePaperClip />
                           <span style={{ maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.originalName || 'Medical File'}</span>
                           <div className="flex gap-xs">
-                            <a href={file.url} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ padding: '2px', color: 'var(--primary)' }}><HiOutlineEye /></a>
-                            <a href={file.url} download className="btn btn-ghost btn-sm" style={{ padding: '2px' }}></a>
+                            <a href={file.url} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ padding: '2px', color: 'var(--primary)' }} title="View"><HiOutlineEye /></a>
+                            <button type="button" onClick={() => handleDownload(file.url, file.originalName)} className="btn btn-ghost btn-sm" style={{ padding: '2px' }} title="Download">
+                              <HiOutlineDownload />
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -287,40 +307,151 @@ export default function DoctorPatientDetail() {
             <div className="empty-state"><div className="empty-icon"><HiOutlineDocumentText /></div><h3>No medical records</h3></div>
           ) : (
             <div className="grid grid-2">
-              {records.map(r => (
-                <div className="card" key={r._id}>
-                  <div className="flex items-center justify-between mb-md">
-                    <span className="chip chip-confirmed">{r.type}</span>
-                    <div className="flex items-center gap-sm">
-                      <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{new Date(r.createdAt).toLocaleDateString()}</span>
-                      <button className="btn btn-ghost btn-sm" onClick={() => startEdit(r)} style={{ padding: '4px', color: 'var(--primary)' }}>
-                        <HiOutlinePencil size={16} />
-                      </button>
-                    </div>
-                  </div>
-                  <h4 style={{ marginBottom: '8px' }}>{r.title}</h4>
-                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{r.description}</p>
-                  {r.files && r.files.length > 0 && (
-                    <div className="mt-md" style={{ borderTop: '1px solid var(--outline-variant)', paddingTop: '12px' }}>
-                      <strong style={{ fontSize: '13px', color: 'var(--text-primary)' }}>Attached Files:</strong>
-                      <div className="flex flex-col gap-sm mt-sm">
-                        {r.files.map((file, idx) => (
-                          <div key={idx} className="flex items-center justify-between px-sm py-xs" style={{ background: 'var(--surface-container-low)', borderRadius: '8px' }}>
-                            <div className="flex items-center gap-sm">
-                              <HiOutlineDocumentText style={{ color: 'var(--primary)', fontSize: '18px' }} />
-                              <span style={{ fontSize: '13px', fontWeight: 500 }}>{file.name || `Medical File ${idx + 1}`}</span>
-                            </div>
-                            <div className="flex gap-xs">
-                              <a href={file.url} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm" style={{ padding: '4px', color: 'var(--primary)' }}><HiOutlineEye /></a>
-                              <a href={file.url} download className="btn btn-ghost btn-sm" style={{ padding: '4px' }}></a>
-                            </div>
-                          </div>
-                        ))}
+              {records.map(r => {
+                // Color configuration based on record type
+                const typeColors = {
+                  'prescription': { bg: 'rgba(99, 102, 241, 0.08)', text: '#6366f1', border: 'rgba(99, 102, 241, 0.15)' },
+                  'lab-result': { bg: 'rgba(16, 185, 129, 0.08)', text: '#10b981', border: 'rgba(16, 185, 129, 0.15)' },
+                  'other': { bg: 'rgba(107, 114, 128, 0.08)', text: '#6b7280', border: 'rgba(107, 114, 128, 0.15)' }
+                };
+                const colors = typeColors[r.type] || typeColors['other'];
+
+                return (
+                  <div className="card" key={r._id} style={{ 
+                    padding: '28px', 
+                    borderRadius: '24px', 
+                    border: '1px solid var(--outline-variant)', 
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.03)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    transition: 'all 0.3s ease',
+                    background: 'var(--surface-container-lowest)'
+                  }}>
+                    <div>
+                      <div className="flex items-center justify-between mb-lg" style={{ flexWrap: 'wrap', gap: '8px' }}>
+                        <span style={{ 
+                          padding: '6px 14px', 
+                          borderRadius: '30px', 
+                          fontSize: '12px', 
+                          fontWeight: 700, 
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          backgroundColor: colors.bg, 
+                          color: colors.text,
+                          border: `1px solid ${colors.border}`
+                        }}>
+                          {r.type.replace('-', ' ')}
+                        </span>
+                        <div className="flex items-center gap-sm">
+                          <span className="flex items-center gap-xs" style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                            <HiOutlineCalendar size={14} />
+                            {new Date(r.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                          <button 
+                            className="btn btn-ghost btn-sm" 
+                            onClick={() => startEdit(r)} 
+                            style={{ 
+                              padding: '6px', 
+                              borderRadius: '8px',
+                              color: 'var(--primary)',
+                              backgroundColor: 'var(--surface-container-low)'
+                            }}
+                            title="Edit Record"
+                          >
+                            <HiOutlinePencil size={15} />
+                          </button>
+                        </div>
                       </div>
+                      
+                      <h4 style={{ 
+                        fontSize: '18px', 
+                        fontWeight: 700, 
+                        marginBottom: '10px', 
+                        color: 'var(--text-primary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <HiOutlineDocumentText className="text-muted" size={20} />
+                        {r.title}
+                      </h4>
+                      
+                      <p style={{ 
+                        fontSize: '14px', 
+                        lineHeight: '1.6', 
+                        color: 'var(--text-secondary)',
+                        marginBottom: '20px',
+                        whiteSpace: 'pre-line'
+                      }}>
+                        {r.description}
+                      </p>
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {r.files && r.files.length > 0 && (
+                      <div style={{ 
+                        marginTop: 'auto',
+                        borderTop: '1px dashed var(--outline-variant)', 
+                        paddingTop: '16px' 
+                      }}>
+                        <div className="flex items-center gap-xs mb-sm" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          <HiOutlinePaperClip size={14} />
+                          <span>Attached Files ({r.files.length})</span>
+                        </div>
+                        <div className="flex flex-col gap-sm">
+                          {r.files.map((file, idx) => (
+                            <div 
+                              key={idx} 
+                              className="flex items-center justify-between px-md py-sm" 
+                              style={{ 
+                                background: 'var(--surface-container-low)', 
+                                borderRadius: '12px',
+                                border: '1px solid transparent',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              <div className="flex items-center gap-sm" style={{ minWidth: 0 }}>
+                                <HiOutlineDocumentText style={{ color: 'var(--primary)', flexShrink: 0 }} size={18} />
+                                <span style={{ 
+                                  fontSize: '13px', 
+                                  fontWeight: 600, 
+                                  color: 'var(--text-primary)',
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis'
+                                }}>
+                                  {file.name || `Medical File ${idx + 1}`}
+                                </span>
+                              </div>
+                              <div className="flex gap-xs" style={{ flexShrink: 0 }}>
+                                <a 
+                                  href={file.url} 
+                                  target="_blank" 
+                                  rel="noreferrer" 
+                                  className="btn btn-ghost btn-sm" 
+                                  style={{ padding: '6px', borderRadius: '8px', color: 'var(--primary)' }} 
+                                  title="View File"
+                                >
+                                  <HiOutlineEye size={16} />
+                                </a>
+                                <button 
+                                  type="button" 
+                                  onClick={() => handleDownload(file.url, file.name)} 
+                                  className="btn btn-ghost btn-sm" 
+                                  style={{ padding: '6px', borderRadius: '8px' }} 
+                                  title="Download File"
+                                >
+                                  <HiOutlineDownload size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </>
