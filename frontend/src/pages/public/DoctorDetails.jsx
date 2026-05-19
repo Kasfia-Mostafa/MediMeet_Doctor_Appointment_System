@@ -5,9 +5,9 @@ import API from '../../api/axios';
 import toast from 'react-hot-toast';
 import {
   HiOutlineStar, HiOutlineLocationMarker, HiOutlineCurrencyBangladeshi,
-  HiOutlineAcademicCap, HiOutlineBriefcase, HiOutlineClock,
-  HiOutlineShieldCheck, HiOutlineChatAlt2, HiOutlineCalendar,
-  HiStar, HiOutlineAnnotation, HiOutlineUserCircle
+  HiOutlineAcademicCap, HiOutlineClock,
+  HiOutlineShieldCheck, HiOutlineCalendar,
+  HiStar, HiOutlineAnnotation
 } from 'react-icons/hi';
 
 export default function DoctorDetails() {
@@ -44,6 +44,7 @@ export default function DoctorDetails() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, [id]);
 
@@ -224,7 +225,7 @@ export default function DoctorDetails() {
                     reviews.map(review => {
                       const isOwner = user && (review.user?._id === user._id || review.user === user._id);
                       const isEdited = new Date(review.updatedAt).getTime() > new Date(review.createdAt).getTime();
-                      
+
                       return (
                         <div key={review._id} style={{ paddingBottom: '24px', borderBottom: '1px solid var(--outline-variant)' }}>
                           <div className="flex items-center justify-between mb-sm">
@@ -234,7 +235,7 @@ export default function DoctorDetails() {
                               </div>
                               <span style={{ fontWeight: 700, fontSize: '15px' }}>{review.user?.name}</span>
                               {isOwner && (
-                                <button 
+                                <button
                                   onClick={() => handleEditClick(review)}
                                   style={{ fontSize: '12px', color: 'var(--primary)', background: 'none', border: 'none', padding: 0, marginLeft: '8px', cursor: 'pointer', fontWeight: 600 }}
                                 >

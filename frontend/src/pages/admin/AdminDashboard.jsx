@@ -1,8 +1,10 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
-import { HiOutlineUserGroup, HiOutlineCalendar, HiOutlineCurrencyBangladeshi, HiOutlineCube, HiOutlineArrowRight, HiOutlineUserAdd } from 'react-icons/hi';
+import { HiOutlineUserGroup, HiOutlineCalendar, HiOutlineCurrencyBangladeshi, HiOutlineArrowRight, HiOutlineUserAdd } from 'react-icons/hi';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ users: 0, doctors: 0, appointments: 0, revenue: 0, recentUsers: [] });

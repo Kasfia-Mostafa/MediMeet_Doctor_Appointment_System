@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
-import { HiOutlineCalendar, HiOutlineFilter, HiOutlineSearch, HiOutlineClock, HiOutlineTrendingUp, HiOutlinePaperClip } from 'react-icons/hi';
+import { HiOutlineCalendar, HiOutlineSearch, HiOutlineClock, HiOutlinePaperClip } from 'react-icons/hi';
 
 export default function DoctorAppointments() {
   const [appointments, setAppointments] = useState([]);
@@ -16,7 +17,7 @@ export default function DoctorAppointments() {
       try {
         const params = { limit: 100 };
         if (filterStatus !== 'all') params.status = filterStatus;
-        
+
         const { data } = await API.get('/appointments', { params });
         setAppointments(data.appointments || []);
       } catch (err) {
@@ -49,7 +50,7 @@ export default function DoctorAppointments() {
     // Date Filter
     const today = new Date();
     today.setHours(0,0,0,0);
-    
+
     if (filterDate === 'today') {
       filtered = filtered.filter(a => {
         const d = new Date(a.date);
@@ -76,7 +77,7 @@ export default function DoctorAppointments() {
 
     // Search
     if (searchTerm) {
-      filtered = filtered.filter(a => 
+      filtered = filtered.filter(a =>
         a.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         a.reason?.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -125,9 +126,9 @@ export default function DoctorAppointments() {
             </div>
             <div className="search-box" style={{ maxWidth: '300px', width: '100%', position: 'relative' }}>
               <HiOutlineSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input 
-                type="text" placeholder="Search patient or reason..." className="input" 
-                style={{ paddingLeft: '36px' }} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} 
+              <input
+                type="text" placeholder="Search patient or reason..." className="input"
+                style={{ paddingLeft: '36px' }} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
@@ -137,8 +138,8 @@ export default function DoctorAppointments() {
               <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)' }}>Filter by Date:</span>
               <div className="flex gap-xs">
                 {['all', 'today', 'tomorrow', 'specific'].map(d => (
-                  <button 
-                    key={d} 
+                  <button
+                    key={d}
                     className={`btn btn-sm ${filterDate === d ? 'btn-primary' : 'btn-ghost'}`}
                     onClick={() => setFilterDate(d)}
                   >
@@ -147,7 +148,7 @@ export default function DoctorAppointments() {
                 ))}
               </div>
               {filterDate === 'specific' && (
-                <input 
+                <input
                   type="date" className="input" style={{ width: 'auto', height: '36px', padding: '0 12px' }}
                   value={specificDate} onChange={(e) => setSpecificDate(e.target.value)}
                 />
@@ -202,8 +203,8 @@ export default function DoctorAppointments() {
                     )}
                   </td>
                   <td>
-                    <select 
-                      className={`chip chip-${a.status}`} 
+                    <select
+                      className={`chip chip-${a.status}`}
                       style={{ border: 'none', cursor: 'pointer', outline: 'none', appearance: 'none', textAlign: 'center', fontSize: '11px' }}
                       value={a.status}
                       onChange={(e) => handleUpdateStatus(a._id, e.target.value)}

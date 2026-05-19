@@ -1,12 +1,34 @@
+/**
+ * ============================================================
+ * App.jsx — Root Application Component
+ * ============================================================
+ * Defines the complete route structure for MediMeet. Routes
+ * are organized into four categories:
+ * 
+ *  1. Public Routes  — Landing, auth pages, doctor search, blog
+ *  2. Patient Routes — Dashboard, appointments, records, billing, wellness
+ *  3. Doctor Routes  — Dashboard, patients, schedule, earnings, reviews
+ *  4. Admin Routes   — Dashboard, user/doctor management, analytics, articles
+ * 
+ * Route protection:
+ *  - ProtectedRoute: Requires any authenticated user
+ *  - RoleRoute: Requires specific role (patient/doctor/admin)
+ * 
+ * Layout wrappers:
+ *  - PublicLayout: Navbar + Footer for public pages
+ *  - DashboardLayout: Navbar + Sidebar for authenticated dashboards
+ * ============================================================
+ */
+
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-// Layouts
+// ── Layout Components ──────────────────────────────────────
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import DashboardLayout from './components/layout/DashboardLayout';
 
-// Public Pages
+// ── Public Pages ───────────────────────────────────────────
 import Landing from './pages/public/Landing';
 import SignIn from './pages/public/SignIn';
 import SignUp from './pages/public/SignUp';
@@ -19,7 +41,7 @@ import DoctorDetails from './pages/public/DoctorDetails';
 import BookAppointment from './pages/public/BookAppointment';
 import NotFound from './pages/public/NotFound';
 
-// Patient Pages
+// ── Patient Dashboard Pages ────────────────────────────────
 import PatientDashboard from './pages/patient/PatientDashboard';
 import PatientAppointments from './pages/patient/PatientAppointments';
 import PatientRecords from './pages/patient/PatientRecords';
@@ -29,7 +51,7 @@ import PatientFamily from './pages/patient/PatientFamily';
 import PatientSettings from './pages/patient/PatientSettings';
 import PatientReviews from './pages/patient/PatientReviews';
 
-// Doctor Pages
+// ── Doctor Dashboard Pages ─────────────────────────────────
 import DoctorDashboard from './pages/doctor/DoctorDashboard';
 import DoctorPatients from './pages/doctor/DoctorPatients';
 import DoctorSchedule from './pages/doctor/DoctorSchedule';
@@ -39,7 +61,7 @@ import DoctorReviews from './pages/doctor/DoctorReviews';
 import DoctorEarnings from './pages/doctor/DoctorEarnings';
 import DoctorAppointments from './pages/doctor/DoctorAppointments';
 
-// Admin Pages
+// ── Admin Dashboard Pages ──────────────────────────────────
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminStaff from './pages/admin/AdminStaff';
 import AdminBlog from './pages/admin/AdminBlog';
@@ -50,10 +72,14 @@ import AdminDoctors from './pages/admin/AdminDoctors';
 import DoctorDetail from './pages/admin/DoctorDetail';
 import AdminAppointments from './pages/admin/AdminAppointments';
 
-// Routing Guards
+// ── Route Guards ───────────────────────────────────────────
 import ProtectedRoute from './routes/ProtectedRoute';
 import RoleRoute from './routes/RoleRoute';
 
+/**
+ * PublicLayout — Wraps public pages with the Navbar and Footer.
+ * Used for pages accessible to all visitors (authenticated or not).
+ */
 function PublicLayout({ children }) {
   return (
     <>
@@ -64,12 +90,16 @@ function PublicLayout({ children }) {
   );
 }
 
+/**
+ * App — Root component that defines all application routes.
+ */
 function App() {
   return (
     <>
+      {/* Global toast notification system */}
       <Toaster position="top-right" toastOptions={{ className: 'toast', duration: 3000, style: { background: 'var(--surface-container-lowest)', color: 'var(--text-primary)', border: '1px solid var(--outline-variant)' } }} />
       <Routes>
-        {/* Public Routes */}
+        {/* ── Public Routes ─────────────────────────────── */}
         <Route path="/" element={<PublicLayout><Landing /></PublicLayout>} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
@@ -81,7 +111,7 @@ function App() {
         <Route path="/doctor-details/:id" element={<PublicLayout><DoctorDetails /></PublicLayout>} />
         <Route path="/book-appointment" element={<ProtectedRoute><PublicLayout><BookAppointment /></PublicLayout></ProtectedRoute>} />
 
-        {/* Patient Routes */}
+        {/* ── Patient Routes (role: patient) ────────────── */}
         <Route path="/patient" element={<RoleRoute roles={['patient']}><DashboardLayout /></RoleRoute>}>
           <Route path="dashboard" element={<PatientDashboard />} />
           <Route path="appointments" element={<PatientAppointments />} />
@@ -93,7 +123,7 @@ function App() {
           <Route path="patientprofile" element={<PatientSettings />} />
         </Route>
 
-        {/* Doctor Routes */}
+        {/* ── Doctor Routes (role: doctor) ───────────────── */}
         <Route path="/doctor" element={<RoleRoute roles={['doctor']}><DashboardLayout /></RoleRoute>}>
           <Route path="dashboard" element={<DoctorDashboard />} />
           <Route path="patients" element={<DoctorPatients />} />
@@ -105,7 +135,7 @@ function App() {
           <Route path="doctorprofile" element={<DoctorSettings />} />
         </Route>
 
-        {/* Admin Routes */}
+        {/* ── Admin Routes (role: admin) ────────────────── */}
         <Route path="/admin" element={<RoleRoute roles={['admin']}><DashboardLayout /></RoleRoute>}>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<AdminStaff />} />
@@ -118,7 +148,7 @@ function App() {
           <Route path="adminprofile" element={<AdminSettings />} />
         </Route>
 
-        {/* 404 */}
+        {/* ── 404 Catch-all ─────────────────────────────── */}
         <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
       </Routes>
     </>

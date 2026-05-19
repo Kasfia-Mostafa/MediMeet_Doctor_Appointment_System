@@ -1,25 +1,51 @@
+/**
+ * ============================================================
+ * Appointment Controller — Booking, Management & Notifications
+ * ============================================================
+ * Handles the full appointment lifecycle: creating new bookings
+ * with double-booking prevention, listing/fetching appointments,
+ * updating status (with email notifications on confirm/cancel),
+ * rescheduling, and cancellation. Also auto-creates billing
+ * records when appointments are booked.
+ * ============================================================
+ */
+
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 const Billing = require('../models/Billing');
 const sendEmail = require('../utils/sendEmail');
 
-// @desc    Book appointment
-// @route   POST /api/appointments
+/**
+ * @desc    Book a new appointment
+ * @route   POST /api/appointments
+ * @access  Private
+ *
+ * Flow:
+ * 1. Validate date and parse to UTC
+ * 2. Check for doctor slot conflicts (double-booking prevention)
+ * 3. Check for patient time conflicts
+ * 4. Process uploaded medical files
+ * 5. Create the appointment document
+ * 6. Auto-create a billing record for the consultation fee
+ * 7. Return the populated appointment
+ */
 const createAppointment = async (req, res, next) => {
   try {
     const { doctor, date, timeSlot, type, reason, symptoms, familyMember, patientNotes, transactionId } = req.body;
     console.log('[createAppointment] Incoming Doctor ID:', doctor);
     console.log('[createAppointment] Incoming Patient ID:', req.user._id);
 
+    // Validate that a date was provided
     if (!date) {
       res.status(400);
       throw new Error('Appointment date is required');
     }
 
+    // Parse the date string to a UTC Date object to avoid timezone issues
     const [year, month, day] = date.split('-').map(Number);
     const bookingDate = new Date(Date.UTC(year, month - 1, day));
 
-    // 1. Check if the time slot is already booked for this doctor
+    // ── Conflict Check 1: Doctor already booked at this slot ──
     const doctorBooked = await Appointment.findOne({
       doctor, date: bookingDate, timeSlot, status: { $in: ['pending', 'confirmed'] },
     });
@@ -30,7 +56,7 @@ const createAppointment = async (req, res, next) => {
       throw new Error(`The doctor is already booked for ${timeSlot} on this date. Please choose another slot.`);
     }
 
-    // 2. Check if the patient already has another appointment at this same time
+    // ── Conflict Check 2: Patient already has an appointment at this time ──
     const patientBusy = await Appointment.findOne({
       patient: req.user._id, date: bookingDate, timeSlot, status: { $in: ['pending', 'confirmed'] },
     });
@@ -43,7 +69,7 @@ const createAppointment = async (req, res, next) => {
 
     console.log('[createAppointment] Conflict checks passed. Processing files...');
 
-    // Process uploaded medical files (if any)
+    // ── Process uploaded medical files (from Cloudinary via multer) ──
     const medicalFiles = (req.files || []).map((file) => ({
       url: file.path,
       publicId: file.filename,
@@ -53,15 +79,17 @@ const createAppointment = async (req, res, next) => {
 
     console.log('[createAppointment] Files processed:', medicalFiles.length);
 
-    // Parse symptoms from comma-separated string if needed
+    // Parse symptoms from comma-separated string if sent as a string
     const parsedSymptoms = Array.isArray(symptoms)
       ? symptoms
       : (symptoms || '').split(',').map((s) => s.trim()).filter(Boolean);
 
+    // Look up the Doctor profile to get consultation fee
     console.log('[createAppointment] Looking for doctor profile with user ID:', doctor);
     const doctorProfile = await Doctor.findOne({ user: doctor });
     console.log('[createAppointment] Found Doctor Profile:', doctorProfile?._id);
 
+    // ── Create the appointment document ──
     const appointment = await Appointment.create({
       patient: req.user._id, doctor, doctorProfile: doctorProfile?._id,
       date: bookingDate, timeSlot, type, reason,
@@ -70,6 +98,7 @@ const createAppointment = async (req, res, next) => {
       paymentStatus: transactionId ? 'paid' : 'pending',
     });
 
+    // ── Auto-create billing record for the consultation fee ──
     const fee = doctorProfile?.consultationFee || 0;
     await Billing.create({
       patient: req.user._id,
@@ -88,6 +117,7 @@ const createAppointment = async (req, res, next) => {
       paidAt: transactionId ? new Date() : null,
     });
 
+    // Populate references for the response
     const populated = await appointment.populate([
       { path: 'doctor', select: 'name email avatar' },
       { path: 'patient', select: 'name email avatar' },
@@ -99,16 +129,24 @@ const createAppointment = async (req, res, next) => {
   }
 };
 
-// @desc    Get appointments
-// @route   GET /api/appointments
+/**
+ * @desc    Get appointments for the authenticated user (paginated)
+ * @route   GET /api/appointments
+ * @access  Private
+ *
+ * Patients see their own appointments; doctors see theirs.
+ * Admins see all (no filter applied).
+ */
 const getAppointments = async (req, res, next) => {
   try {
     const { status, page = 1, limit = 20 } = req.query;
     const query = {};
 
+    // Role-based filtering
     if (req.user.role === 'patient') query.patient = req.user._id;
     else if (req.user.role === 'doctor') query.doctor = req.user._id;
 
+    // Optional status filter
     if (status) query.status = status;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -130,8 +168,11 @@ const getAppointments = async (req, res, next) => {
   }
 };
 
-// @desc    Get single appointment
-// @route   GET /api/appointments/:id
+/**
+ * @desc    Get a single appointment by ID
+ * @route   GET /api/appointments/:id
+ * @access  Private
+ */
 const getAppointment = async (req, res, next) => {
   try {
     const appointment = await Appointment.findById(req.params.id)
@@ -150,7 +191,11 @@ const getAppointment = async (req, res, next) => {
   }
 };
 
-// Helper to send cancellation emails
+/**
+ * Helper: Sends a styled cancellation email to the patient.
+ * @param {Object} appointment - The appointment document
+ * @param {string} userRole    - Role of the user who cancelled
+ */
 const sendCancellationEmail = async (appointment, userRole) => {
   const populated = await appointment.populate([
     { path: 'doctor', select: 'name' },
@@ -193,7 +238,11 @@ const sendCancellationEmail = async (appointment, userRole) => {
   }
 };
 
-// Helper to send confirmation emails
+/**
+ * Helper: Sends a styled confirmation email to the patient.
+ * @param {Object} appointment - The appointment document
+ * @param {string} userRole    - Role of the user who confirmed
+ */
 const sendConfirmationEmail = async (appointment, userRole) => {
   const populated = await appointment.populate([
     { path: 'doctor', select: 'name' },
@@ -238,8 +287,14 @@ const sendConfirmationEmail = async (appointment, userRole) => {
   }
 };
 
-// @desc    Update appointment
-// @route   PUT /api/appointments/:id
+/**
+ * @desc    Update appointment status, notes, prescription, or follow-up
+ * @route   PUT /api/appointments/:id
+ * @access  Private
+ *
+ * Triggers email notifications when status changes to
+ * 'cancelled' or 'confirmed'.
+ */
 const updateAppointment = async (req, res, next) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
@@ -251,6 +306,7 @@ const updateAppointment = async (req, res, next) => {
     const { status, notes, prescription, followUp, cancelReason } = req.body;
     const oldStatus = appointment.status;
 
+    // Apply provided updates
     if (status) appointment.status = status;
     if (notes) appointment.notes = notes;
     if (prescription) appointment.prescription = prescription;
@@ -259,12 +315,12 @@ const updateAppointment = async (req, res, next) => {
 
     await appointment.save();
 
-    // If status changed to cancelled, send email
+    // Send cancellation email if status changed to cancelled
     if (status === 'cancelled' && oldStatus !== 'cancelled') {
       await sendCancellationEmail(appointment, req.user.role);
     }
 
-    // If status changed to confirmed, send confirmation email
+    // Send confirmation email if status changed to confirmed
     if (status === 'confirmed' && oldStatus !== 'confirmed') {
       await sendConfirmationEmail(appointment, req.user.role);
     }
@@ -275,8 +331,14 @@ const updateAppointment = async (req, res, next) => {
   }
 };
 
-// @desc    Reschedule appointment
-// @route   PUT /api/appointments/:id/reschedule
+/**
+ * @desc    Reschedule an appointment to a new date/time
+ * @route   PUT /api/appointments/:id/reschedule
+ * @access  Private
+ *
+ * Resets the appointment status to 'pending' so the doctor
+ * must re-confirm the rescheduled appointment.
+ */
 const rescheduleAppointment = async (req, res, next) => {
   try {
     const { date, timeSlot } = req.body;
@@ -292,10 +354,11 @@ const rescheduleAppointment = async (req, res, next) => {
       throw new Error('Please provide new date and time slot');
     }
 
+    // Parse to UTC date
     const [year, month, day] = date.split('-').map(Number);
     const bookingDate = new Date(Date.UTC(year, month - 1, day));
 
-    // Conflict check
+    // Check for conflicts with other appointments (excluding this one)
     const conflict = await Appointment.findOne({
       doctor: appointment.doctor,
       date: bookingDate,
@@ -309,6 +372,7 @@ const rescheduleAppointment = async (req, res, next) => {
       throw new Error('The selected slot is already booked');
     }
 
+    // Update the appointment with new date/time
     appointment.date = bookingDate;
     appointment.timeSlot = timeSlot;
     appointment.status = 'pending'; // Reset to pending for doctor re-approval
@@ -321,8 +385,13 @@ const rescheduleAppointment = async (req, res, next) => {
   }
 };
 
-// @desc    Cancel appointment
-// @route   DELETE /api/appointments/:id
+/**
+ * @desc    Cancel an appointment
+ * @route   DELETE /api/appointments/:id
+ * @access  Private
+ *
+ * Sets status to 'cancelled' and sends a cancellation email.
+ */
 const cancelAppointment = async (req, res, next) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
@@ -335,6 +404,7 @@ const cancelAppointment = async (req, res, next) => {
     appointment.cancelReason = req.body.reason || 'Cancelled by user';
     await appointment.save();
 
+    // Notify patient via email
     await sendCancellationEmail(appointment, req.user.role);
 
     res.json({ message: 'Appointment cancelled', appointment });

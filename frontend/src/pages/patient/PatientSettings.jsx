@@ -1,15 +1,16 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/immutability */
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
 import {
-  HiOutlineUserCircle, HiOutlineLockClosed, HiOutlineShieldCheck,
+  HiOutlineUserCircle, HiOutlineLockClosed,
   HiOutlineMap, HiOutlinePhone, HiOutlineCamera, HiOutlineIdentification,
   HiOutlineHeart, HiOutlineMail, HiOutlineSave, HiOutlineChatAlt2,
   HiStar, HiOutlineStar, HiOutlinePencil, HiOutlineTrash,
   HiOutlineExclamationCircle, HiOutlineEye, HiOutlineEyeOff
 } from 'react-icons/hi';
-import { Link } from 'react-router-dom';
 
 // Shared Password Input Component
 const PasswordInput = ({ label, value, onChange, field, showPw, setShowPw }) => (
@@ -22,9 +23,9 @@ const PasswordInput = ({ label, value, onChange, field, showPw, setShowPw }) => 
         value={value}
         onChange={onChange}
         required
-        style={{ 
-          borderRadius: '16px', height: '54px', border: '1.5px solid var(--outline-variant)', 
-          background: 'var(--surface-container-lowest)', paddingRight: '48px' 
+        style={{
+          borderRadius: '16px', height: '54px', border: '1.5px solid var(--outline-variant)',
+          background: 'var(--surface-container-lowest)', paddingRight: '48px'
         }}
       />
       <button
@@ -105,8 +106,8 @@ export default function PatientSettings() {
     e.preventDefault();
     setLoading(true);
     try {
-      const updateData = { 
-        ...form, 
+      const updateData = {
+        ...form,
         phone: form.phone ? `+880${form.phone}` : '',
         emergencyContact: {
           ...form.emergencyContact,
@@ -323,14 +324,14 @@ export default function PatientSettings() {
                         <label style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px', display: 'block', color: 'var(--text-secondary)' }}>Account Email</label>
                         <div style={{ position: 'relative' }}>
                           <HiOutlineMail style={{ position: 'absolute', left: '18px', top: '18px', color: 'var(--text-muted)' }} />
-                          <input 
-                            className="input" value={form.email} 
+                          <input
+                            className="input" value={form.email}
                             onChange={e => setForm({...form, email: e.target.value})}
                             required
-                            style={{ 
+                            style={{
                               paddingLeft: '48px', height: '54px', borderRadius: '16px', border: '1.5px solid var(--outline-variant)',
                               background: 'var(--surface-container-lowest)', color: 'var(--text-primary)'
-                            }} 
+                            }}
                           />
                         </div>
                       </div>
@@ -342,9 +343,9 @@ export default function PatientSettings() {
                         <div className="phone-input-wrapper" style={{ height: '54px' }}>
                           <span className="phone-prefix">+880</span>
                           <input
-                            className="input" 
+                            className="input"
                             style={{ border: 'none', borderRadius: 0, flex: 1, paddingLeft: '12px' }}
-                            value={form.phone} 
+                            value={form.phone}
                             onChange={e => setForm({...form, phone: e.target.value})}
                             placeholder="1XXX-XXXXXX"
                           />
@@ -382,7 +383,7 @@ export default function PatientSettings() {
                         <div className="input-group">
                           <label style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px', display: 'block', color: 'var(--text-secondary)' }}>Contact Name</label>
                           <input
-                            className="input" 
+                            className="input"
                             value={form.emergencyContact.name}
                             onChange={e => setForm({
                               ...form,
@@ -397,9 +398,9 @@ export default function PatientSettings() {
                           <div className="phone-input-wrapper" style={{ height: '54px' }}>
                             <span className="phone-prefix">+880</span>
                             <input
-                              className="input" 
+                              className="input"
                               style={{ border: 'none', borderRadius: 0, flex: 1, paddingLeft: '12px' }}
-                              value={form.emergencyContact.phone} 
+                              value={form.emergencyContact.phone}
                               onChange={e => setForm({
                                 ...form,
                                 emergencyContact: { ...form.emergencyContact, phone: e.target.value }
@@ -554,26 +555,26 @@ export default function PatientSettings() {
                     <h3 style={{ fontSize: '20px', fontWeight: 800 }}>Update Password</h3>
                   </div>
 
-                  <PasswordInput 
-                    label="Current Password" 
+                  <PasswordInput
+                    label="Current Password"
                     field="current"
                     value={pwForm.currentPassword}
                     onChange={e => setPwForm({...pwForm, currentPassword: e.target.value})}
                     showPw={showPw}
                     setShowPw={setShowPw}
                   />
-                  
+
                   <div className="grid grid-2" style={{ gap: '24px', marginTop: '24px' }}>
-                    <PasswordInput 
-                      label="New Password" 
+                    <PasswordInput
+                      label="New Password"
                       field="new"
                       value={pwForm.newPassword}
                       onChange={e => setPwForm({...pwForm, newPassword: e.target.value})}
                       showPw={showPw}
                       setShowPw={setShowPw}
                     />
-                    <PasswordInput 
-                      label="Confirm New Password" 
+                    <PasswordInput
+                      label="Confirm New Password"
                       field="confirm"
                       value={pwForm.confirmPassword}
                       onChange={e => setPwForm({...pwForm, confirmPassword: e.target.value})}

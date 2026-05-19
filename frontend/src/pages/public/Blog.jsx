@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
-import { HiOutlineCalendar, HiOutlineArrowRight, HiOutlineClock, HiOutlineUser } from 'react-icons/hi';
+import { HiOutlineCalendar, HiOutlineArrowRight, HiOutlineUser } from 'react-icons/hi';
 import './Blog.css';
 
 const categories = ['All', 'wellness', 'nutrition', 'mental-health', 'fitness', 'medical-tips', 'news', 'other'];

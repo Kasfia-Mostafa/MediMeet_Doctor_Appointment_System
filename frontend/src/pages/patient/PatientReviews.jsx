@@ -1,9 +1,11 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
-import { 
-  HiOutlineStar, HiStar, HiOutlineChatAlt2, HiOutlineTrash, 
-  HiOutlinePencil, HiOutlineExclamationCircle 
+import {
+  HiOutlineStar, HiStar, HiOutlineChatAlt2, HiOutlineTrash,
+  HiOutlinePencil
 } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 
@@ -17,6 +19,7 @@ export default function PatientReviews() {
     try {
       const { data } = await API.get('/reviews/me');
       setReviews(data);
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       toast.error('Failed to load reviews');
     } finally {
@@ -100,13 +103,13 @@ export default function PatientReviews() {
               </div>
 
               <div className="flex gap-sm">
-                <button 
+                <button
                   onClick={() => { setEditingReview(review); setEditForm({ rating: review.rating, comment: review.comment }); }}
                   className="btn btn-secondary btn-sm flex-1" style={{ borderRadius: '12px', gap: '8px' }}
                 >
                   <HiOutlinePencil /> Edit Feedback
                 </button>
-                <button 
+                <button
                   onClick={() => handleDelete(review._id)}
                   className="btn btn-ghost btn-sm" style={{ color: 'var(--error)', padding: '0 12px' }}
                 >
@@ -128,7 +131,7 @@ export default function PatientReviews() {
               </div>
               <h2 style={{ fontSize: '24px', fontWeight: 800 }}>Update Feedback</h2>
             </div>
-            
+
             <form onSubmit={handleEditSubmit}>
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', fontWeight: 700, marginBottom: '12px', fontSize: '14px' }}>Your Rating</label>
@@ -147,9 +150,9 @@ export default function PatientReviews() {
 
               <div className="input-group">
                 <label style={{ fontWeight: 700, marginBottom: '12px', display: 'block' }}>Share your experience</label>
-                <textarea 
-                  className="input" rows={4} value={editForm.comment} 
-                  onChange={e => setEditForm({ ...editForm, comment: e.target.value })} 
+                <textarea
+                  className="input" rows={4} value={editForm.comment}
+                  onChange={e => setEditForm({ ...editForm, comment: e.target.value })}
                   required style={{ borderRadius: '16px', padding: '16px' }}
                 />
               </div>

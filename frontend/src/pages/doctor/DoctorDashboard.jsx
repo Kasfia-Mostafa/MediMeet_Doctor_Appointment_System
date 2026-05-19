@@ -4,10 +4,9 @@ import API from '../../api/axios';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import {
-  HiOutlineUserGroup, HiOutlineCalendar, HiOutlineClipboardList,
-  HiOutlineArrowRight, HiOutlineClock, HiOutlineShieldCheck,
-  HiOutlineTrendingUp, HiOutlineBell, HiOutlineUserCircle,
-  HiOutlineChatAlt2, HiOutlineCurrencyBangladeshi, HiOutlinePaperClip, HiOutlineStar
+  HiOutlineUserGroup, HiOutlineCalendar,
+  HiOutlineArrowRight, HiOutlineClock, HiOutlineShieldCheck, HiOutlineUserCircle,
+  HiOutlineChatAlt2, HiOutlineCurrencyBangladeshi, HiOutlinePaperClip
 } from 'react-icons/hi';
 
 export default function DoctorDashboard() {
@@ -21,7 +20,7 @@ export default function DoctorDashboard() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const [apptRes, patientsRes, reviewsRes] = await Promise.all([
+        const [apptRes, patientsRes] = await Promise.all([
           API.get('/appointments', { params: { limit: 10 } }),
           API.get('/doctors/patients'),
           doctorProfile?._id ? API.get(`/reviews/doctor/${doctorProfile._id}`) : Promise.resolve({ data: [] })

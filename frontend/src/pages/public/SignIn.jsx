@@ -53,9 +53,9 @@ export default function SignIn() {
         <div className="auth-form-wrapper">
           <Link to="/" style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
             <img src={Logo} alt="MediMeet" style={{ height: '40px', width: 'auto' }} />
-            <span style={{ 
-              fontSize: '28px', 
-              fontWeight: 800, 
+            <span style={{
+              fontSize: '28px',
+              fontWeight: 800,
               background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',

@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
-import { HiOutlineCalendar, HiOutlineFilter, HiOutlineSearch } from 'react-icons/hi';
+import { HiOutlineCalendar, HiOutlineSearch } from 'react-icons/hi';
 
 const formatTime12h = (time24) => {
   if (!time24 || typeof time24 !== 'string') return '';

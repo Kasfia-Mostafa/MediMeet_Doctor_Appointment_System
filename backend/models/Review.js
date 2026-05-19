@@ -1,3 +1,12 @@
+/**
+ * ============================================================
+ * Review Model — Mongoose Schema
+ * ============================================================
+ * Stores patient reviews/ratings for doctors. One review per
+ * patient per doctor (enforced by compound unique index).
+ * ============================================================
+ */
+
 const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema(

@@ -46,6 +46,7 @@ export default function FindDoctor() {
 
   // Reset to first page when search or filters change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [search, activeSpec]);
 

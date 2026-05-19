@@ -1,3 +1,13 @@
+/**
+ * ============================================================
+ * Appointment Routes — /api/appointments
+ * ============================================================
+ * Defines routes for appointment CRUD operations. All routes
+ * require authentication. The POST route uses multer middleware
+ * for medical file uploads before creating the appointment.
+ * ============================================================
+ */
+
 const express = require('express');
 const router = express.Router();
 const {
@@ -11,9 +21,11 @@ const {
 const protect = require('../middleware/auth');
 const uploadMedicalFiles = require('../middleware/uploadMedicalFiles');
 
+// All appointment routes require authentication
 router.use(protect);
 
-// POST /api/appointments — uses multer for file upload then creates the appointment
+// POST /api/appointments — Book a new appointment (with optional file uploads)
+// The multer middleware processes file uploads before the controller runs
 router.post('/', (req, res, next) => {
   console.log('[appointmentRoutes] POST / request received');
   uploadMedicalFiles(req, res, (err) => {
@@ -24,10 +36,10 @@ router.post('/', (req, res, next) => {
   });
 }, createAppointment);
 
-router.get('/', getAppointments);
-router.get('/:id', getAppointment);
-router.put('/:id', updateAppointment);
-router.put('/:id/reschedule', rescheduleAppointment);
-router.delete('/:id', cancelAppointment);
+router.get('/', getAppointments);                   // GET    /api/appointments         — List appointments
+router.get('/:id', getAppointment);                 // GET    /api/appointments/:id     — Get single appointment
+router.put('/:id', updateAppointment);              // PUT    /api/appointments/:id     — Update appointment
+router.put('/:id/reschedule', rescheduleAppointment); // PUT  /api/appointments/:id/reschedule — Reschedule
+router.delete('/:id', cancelAppointment);           // DELETE /api/appointments/:id     — Cancel appointment
 
 module.exports = router;

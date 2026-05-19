@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import API from '../../api/axios';
-import { HiOutlineCalendar, HiOutlineArrowLeft, HiOutlineUser } from 'react-icons/hi';
+import { HiOutlineCalendar, HiOutlineArrowLeft } from 'react-icons/hi';
 import './Blog.css'; // Reuse blog styles
 
 export default function BlogDetails() {

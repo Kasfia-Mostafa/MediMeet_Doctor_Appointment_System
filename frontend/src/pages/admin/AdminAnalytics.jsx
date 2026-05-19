@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
-import { HiOutlineChartBar, HiOutlineCurrencyBangladeshi, HiOutlineCalendar, HiOutlineTrendingUp } from 'react-icons/hi';
+import {HiOutlineCurrencyBangladeshi, HiOutlineCalendar, HiOutlineTrendingUp } from 'react-icons/hi';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend } from 'recharts';
 
 const COLORS = ['var(--primary)', 'var(--secondary)', 'var(--success)', '#FF8042', '#8884d8'];

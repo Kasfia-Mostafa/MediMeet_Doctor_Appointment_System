@@ -11,6 +11,7 @@ export default function PatientFamily() {
   const [form, setForm] = useState({ name: '', relation: '', dateOfBirth: '', bloodGroup: '' });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMembers(user?.familyMembers || []);
   }, [user]);
 

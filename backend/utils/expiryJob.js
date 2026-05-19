@@ -1,12 +1,23 @@
+/**
+ * ============================================================
+ * Appointment Expiry Cron Job
+ * ============================================================
+ * Runs every hour to find appointments whose scheduled date
+ * has passed but are still in 'pending' or 'confirmed' status.
+ * These are automatically marked as 'no-show' and the patient
+ * receives an email prompting them to reschedule.
+ * 
+ * Schedule: "0 * * * *" (top of every hour)
+ * ============================================================
+ */
+
 const cron = require('node-cron');
 const Appointment = require('../models/Appointment');
 const sendEmail = require('./sendEmail');
 
 /**
- * Automates appointment status management.
- * 1. Checks for appointments whose date has passed.
- * 2. Updates status to 'no-show' (Expired).
- * 3. Sends an automated email to the patient to prompt rescheduling.
+ * Registers and starts the cron job for appointment expiry checks.
+ * Called once during server startup in server.js.
  */
 const scheduleExpiryCheck = () => {
   // Run every hour to keep the system clean
@@ -20,10 +31,13 @@ const scheduleExpiryCheck = () => {
         status: { $in: ['pending', 'confirmed'] }
       }).populate('patient', 'name email').populate('doctor', 'name');
 
+      // Process each expired appointment
       for (const appt of expiredAppointments) {
+        // Update status to 'no-show' (expired)
         appt.status = 'no-show'; 
         await appt.save();
 
+        // Send expiry notification email to the patient
         if (appt.patient && appt.patient.email) {
           const subject = `Your appointment with ${appt.doctor?.name || 'Doctor'} has expired`;
           const message = `
@@ -52,7 +66,7 @@ const scheduleExpiryCheck = () => {
           try {
             await sendEmail({ email: appt.patient.email, subject, message });
           } catch (err) {
-            // Silently fail or log to a file in production
+            // Silently fail — email errors should not crash the cron job
           }
         }
       }

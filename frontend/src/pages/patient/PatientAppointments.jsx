@@ -34,13 +34,14 @@ export default function PatientAppointments() {
         const params = statusParam !== 'all' ? { status: statusParam } : {};
         const { data } = await API.get('/appointments', { params });
         setAppointments(data.appointments || []);
-      } catch {} finally { setLoading(false); }
+      } catch { /* empty */ } finally { setLoading(false); }
     };
     fetch();
   }, [filter]);
 
   useEffect(() => {
     if (showRescheduleModal && rescheduleData.date && rescheduleData.doctorProfileId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoadingSlots(true);
       API.get(`/doctors/${rescheduleData.doctorProfileId}/slots`, { params: { date: rescheduleData.date } })
         .then(({ data }) => {
@@ -65,8 +66,9 @@ export default function PatientAppointments() {
       await API.delete(`/appointments/${selectedApptId}`, { data: { reason: 'Cancelled by patient' } });
       setAppointments(prev => prev.map(a => a._id === selectedApptId ? { ...a, status: 'cancelled' } : a));
       toast.success('Appointment cancelled');
-    } catch (err) { 
-      toast.error('Failed to cancel'); 
+    // eslint-disable-next-line no-unused-vars
+    } catch (err) {
+      toast.error('Failed to cancel');
     } finally {
       setShowCancelModal(false);
       setSelectedApptId(null);
@@ -74,8 +76,8 @@ export default function PatientAppointments() {
   };
 
   const handleRescheduleClick = (appt) => {
-    setRescheduleData({ 
-      date: new Date(appt.date).toISOString().split('T')[0], 
+    setRescheduleData({
+      date: new Date(appt.date).toISOString().split('T')[0],
       timeSlot: appt.timeSlot,
       doctorProfileId: appt.doctorProfile?._id || appt.doctorProfile
     });
@@ -179,12 +181,12 @@ export default function PatientAppointments() {
             <div className="flex flex-col gap-lg">
               <div className="input-group">
                 <label>New Date</label>
-                <input 
-                  type="date" 
-                  className="input" 
+                <input
+                  type="date"
+                  className="input"
                   min={new Date().toISOString().split('T')[0]}
-                  value={rescheduleData.date} 
-                  onChange={e => setRescheduleData({...rescheduleData, date: e.target.value, timeSlot: ''})} 
+                  value={rescheduleData.date}
+                  onChange={e => setRescheduleData({...rescheduleData, date: e.target.value, timeSlot: ''})}
                 />
               </div>
 
@@ -195,8 +197,8 @@ export default function PatientAppointments() {
                     {availableSlots.map(slot => {
                       const isBooked = bookedSlots.includes(slot);
                       return (
-                        <button 
-                          key={slot} 
+                        <button
+                          key={slot}
                           disabled={isBooked}
                           className={`btn btn-sm ${rescheduleData.timeSlot === slot ? 'btn-primary' : 'btn-outline'} ${isBooked ? 'opacity-50' : ''}`}
                           onClick={() => !isBooked && setRescheduleData({...rescheduleData, timeSlot: slot})}

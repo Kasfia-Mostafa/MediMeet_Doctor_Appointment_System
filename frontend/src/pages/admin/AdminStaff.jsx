@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback } from 'react';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
 import {
   HiOutlineUserGroup, HiOutlineTrash, HiOutlineSearch,
-  HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineFilter
+  HiOutlineChevronLeft, HiOutlineChevronRight
 } from 'react-icons/hi';
 
 export default function AdminStaff() {
@@ -231,15 +232,15 @@ export default function AdminStaff() {
               Are you sure you want to delete <strong>{deleteModal.userName}</strong>? This action cannot be undone.
             </p>
             <div className="flex gap-md">
-              <button 
-                className="btn btn-secondary btn-block" 
+              <button
+                className="btn btn-secondary btn-block"
                 onClick={() => setDeleteModal({ open: false, userId: null, userName: '' })}
                 disabled={deleteLoading}
               >
                 Cancel
               </button>
-              <button 
-                className="btn btn-primary btn-block" 
+              <button
+                className="btn btn-primary btn-block"
                 style={{ background: 'var(--error)', borderColor: 'var(--error)' }}
                 onClick={confirmDelete}
                 disabled={deleteLoading}

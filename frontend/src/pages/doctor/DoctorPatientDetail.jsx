@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import API from '../../api/axios';
@@ -317,10 +318,10 @@ export default function DoctorPatientDetail() {
                 const colors = typeColors[r.type] || typeColors['other'];
 
                 return (
-                  <div className="card" key={r._id} style={{ 
-                    padding: '28px', 
-                    borderRadius: '24px', 
-                    border: '1px solid var(--outline-variant)', 
+                  <div className="card" key={r._id} style={{
+                    padding: '28px',
+                    borderRadius: '24px',
+                    border: '1px solid var(--outline-variant)',
                     boxShadow: '0 8px 30px rgba(0,0,0,0.03)',
                     display: 'flex',
                     flexDirection: 'column',
@@ -330,14 +331,14 @@ export default function DoctorPatientDetail() {
                   }}>
                     <div>
                       <div className="flex items-center justify-between mb-lg" style={{ flexWrap: 'wrap', gap: '8px' }}>
-                        <span style={{ 
-                          padding: '6px 14px', 
-                          borderRadius: '30px', 
-                          fontSize: '12px', 
-                          fontWeight: 700, 
+                        <span style={{
+                          padding: '6px 14px',
+                          borderRadius: '30px',
+                          fontSize: '12px',
+                          fontWeight: 700,
                           textTransform: 'uppercase',
                           letterSpacing: '0.5px',
-                          backgroundColor: colors.bg, 
+                          backgroundColor: colors.bg,
                           color: colors.text,
                           border: `1px solid ${colors.border}`
                         }}>
@@ -348,11 +349,11 @@ export default function DoctorPatientDetail() {
                             <HiOutlineCalendar size={14} />
                             {new Date(r.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                           </span>
-                          <button 
-                            className="btn btn-ghost btn-sm" 
-                            onClick={() => startEdit(r)} 
-                            style={{ 
-                              padding: '6px', 
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => startEdit(r)}
+                            style={{
+                              padding: '6px',
                               borderRadius: '8px',
                               color: 'var(--primary)',
                               backgroundColor: 'var(--surface-container-low)'
@@ -363,11 +364,11 @@ export default function DoctorPatientDetail() {
                           </button>
                         </div>
                       </div>
-                      
-                      <h4 style={{ 
-                        fontSize: '18px', 
-                        fontWeight: 700, 
-                        marginBottom: '10px', 
+
+                      <h4 style={{
+                        fontSize: '18px',
+                        fontWeight: 700,
+                        marginBottom: '10px',
                         color: 'var(--text-primary)',
                         display: 'flex',
                         alignItems: 'center',
@@ -376,10 +377,10 @@ export default function DoctorPatientDetail() {
                         <HiOutlineDocumentText className="text-muted" size={20} />
                         {r.title}
                       </h4>
-                      
-                      <p style={{ 
-                        fontSize: '14px', 
-                        lineHeight: '1.6', 
+
+                      <p style={{
+                        fontSize: '14px',
+                        lineHeight: '1.6',
                         color: 'var(--text-secondary)',
                         marginBottom: '20px',
                         whiteSpace: 'pre-line'
@@ -389,10 +390,10 @@ export default function DoctorPatientDetail() {
                     </div>
 
                     {r.files && r.files.length > 0 && (
-                      <div style={{ 
+                      <div style={{
                         marginTop: 'auto',
-                        borderTop: '1px dashed var(--outline-variant)', 
-                        paddingTop: '16px' 
+                        borderTop: '1px dashed var(--outline-variant)',
+                        paddingTop: '16px'
                       }}>
                         <div className="flex items-center gap-xs mb-sm" style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                           <HiOutlinePaperClip size={14} />
@@ -400,11 +401,11 @@ export default function DoctorPatientDetail() {
                         </div>
                         <div className="flex flex-col gap-sm">
                           {r.files.map((file, idx) => (
-                            <div 
-                              key={idx} 
-                              className="flex items-center justify-between px-md py-sm" 
-                              style={{ 
-                                background: 'var(--surface-container-low)', 
+                            <div
+                              key={idx}
+                              className="flex items-center justify-between px-md py-sm"
+                              style={{
+                                background: 'var(--surface-container-low)',
                                 borderRadius: '12px',
                                 border: '1px solid transparent',
                                 transition: 'all 0.2s ease'
@@ -412,9 +413,9 @@ export default function DoctorPatientDetail() {
                             >
                               <div className="flex items-center gap-sm" style={{ minWidth: 0 }}>
                                 <HiOutlineDocumentText style={{ color: 'var(--primary)', flexShrink: 0 }} size={18} />
-                                <span style={{ 
-                                  fontSize: '13px', 
-                                  fontWeight: 600, 
+                                <span style={{
+                                  fontSize: '13px',
+                                  fontWeight: 600,
                                   color: 'var(--text-primary)',
                                   whiteSpace: 'nowrap',
                                   overflow: 'hidden',
@@ -424,21 +425,21 @@ export default function DoctorPatientDetail() {
                                 </span>
                               </div>
                               <div className="flex gap-xs" style={{ flexShrink: 0 }}>
-                                <a 
-                                  href={file.url} 
-                                  target="_blank" 
-                                  rel="noreferrer" 
-                                  className="btn btn-ghost btn-sm" 
-                                  style={{ padding: '6px', borderRadius: '8px', color: 'var(--primary)' }} 
+                                <a
+                                  href={file.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="btn btn-ghost btn-sm"
+                                  style={{ padding: '6px', borderRadius: '8px', color: 'var(--primary)' }}
                                   title="View File"
                                 >
                                   <HiOutlineEye size={16} />
                                 </a>
-                                <button 
-                                  type="button" 
-                                  onClick={() => handleDownload(file.url, file.name)} 
-                                  className="btn btn-ghost btn-sm" 
-                                  style={{ padding: '6px', borderRadius: '8px' }} 
+                                <button
+                                  type="button"
+                                  onClick={() => handleDownload(file.url, file.name)}
+                                  className="btn btn-ghost btn-sm"
+                                  style={{ padding: '6px', borderRadius: '8px' }}
                                   title="Download File"
                                 >
                                   <HiOutlineDownload size={16} />

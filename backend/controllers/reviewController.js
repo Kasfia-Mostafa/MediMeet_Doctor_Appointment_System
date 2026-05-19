@@ -1,33 +1,50 @@
+/**
+ * ============================================================
+ * Review Controller — Doctor Review System
+ * ============================================================
+ * Handles the review/rating system for doctors. Patients can
+ * add, update, and delete reviews. Each review triggers a
+ * recalculation of the doctor's aggregate rating and total
+ * review count. One review per patient per doctor is enforced.
+ * ============================================================
+ */
+
 const Review = require('../models/Review');
 const Doctor = require('../models/Doctor');
 
-// @desc    Add a review
-// @route   POST /api/reviews
+/**
+ * @desc    Add a new review for a doctor
+ * @route   POST /api/reviews
+ * @access  Private (Patient only)
+ *
+ * Validates role, checks for duplicates, creates the review,
+ * then recalculates the doctor's aggregate rating.
+ */
 const addReview = async (req, res, next) => {
   try {
     const { doctorId, rating, comment } = req.body;
     
-    // 1. Role verification (only patients)
+    // 1. Role verification — only patients can submit reviews
     if (req.user.role !== 'patient') {
       res.status(403);
       throw new Error('Clinical feedback can only be submitted by patients');
     }
 
-    // 2. Resource verification
+    // 2. Verify the doctor exists
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) {
       res.status(404);
       throw new Error('Healthcare provider record not found');
     }
 
-    // 3. Duplicate prevention
+    // 3. Check for duplicate review (one per patient per doctor)
     const existingReview = await Review.findOne({ doctor: doctorId, user: req.user._id });
     if (existingReview) {
       res.status(400);
       throw new Error('You have already shared your experience for this provider');
     }
 
-    // 4. Persistence
+    // 4. Create the review
     const review = await Review.create({
       doctor: doctorId,
       user: req.user._id,
@@ -35,12 +52,11 @@ const addReview = async (req, res, next) => {
       comment: comment.trim()
     });
 
-    // 5. Automated Rating aggregation
+    // 5. Recalculate the doctor's aggregate rating
     const allReviews = await Review.find({ doctor: doctorId });
     const count = allReviews.length;
     const avg = allReviews.reduce((acc, item) => item.rating + acc, 0) / count;
 
-    // Use findByIdAndUpdate for a more atomic update
     await Doctor.findByIdAndUpdate(doctorId, {
       rating: avg || rating,
       totalReviews: count
@@ -53,8 +69,11 @@ const addReview = async (req, res, next) => {
   }
 };
 
-// @desc    Get reviews for a doctor
-// @route   GET /api/reviews/doctor/:id
+/**
+ * @desc    Get all reviews for a specific doctor
+ * @route   GET /api/reviews/doctor/:id
+ * @access  Public
+ */
 const getDoctorReviews = async (req, res, next) => {
   try {
     const reviews = await Review.find({ doctor: req.params.id })
@@ -66,20 +85,23 @@ const getDoctorReviews = async (req, res, next) => {
   }
 };
 
-// @desc    Update a review
-// @route   PUT /api/reviews/:id
+/**
+ * @desc    Update an existing review (only by the original author)
+ * @route   PUT /api/reviews/:id
+ * @access  Private
+ */
 const updateReview = async (req, res, next) => {
   try {
     const { rating, comment } = req.body;
     
-    // 1. Fetch review with existence check
+    // 1. Fetch review
     const review = await Review.findById(req.params.id);
     if (!review) {
       res.status(404);
       throw new Error('Clinical feedback record not found');
     }
 
-    // 2. Security: Verify authorship
+    // 2. Authorization — only the original author can modify
     if (review.user.toString() !== req.user._id.toString()) {
       res.status(403);
       throw new Error('Unauthorized: You can only modify your own feedback');
@@ -88,10 +110,9 @@ const updateReview = async (req, res, next) => {
     // 3. Apply updates
     if (rating) review.rating = Number(rating);
     if (comment) review.comment = comment.trim();
-    
     await review.save();
 
-    // 4. Atomic Refresh of Doctor Metrics
+    // 4. Recalculate the doctor's aggregate rating
     const allReviews = await Review.find({ doctor: review.doctor });
     const count = allReviews.length;
     const avg = count > 0 ? (allReviews.reduce((acc, item) => item.rating + acc, 0) / count) : 0;
@@ -108,8 +129,11 @@ const updateReview = async (req, res, next) => {
   }
 };
 
-// @desc    Get my reviews
-// @route   GET /api/reviews/me
+/**
+ * @desc    Get all reviews written by the authenticated user
+ * @route   GET /api/reviews/me
+ * @access  Private
+ */
 const getMyReviews = async (req, res, next) => {
   try {
     const reviews = await Review.find({ user: req.user._id })
@@ -129,8 +153,13 @@ const getMyReviews = async (req, res, next) => {
   }
 };
 
-// @desc    Delete a review
-// @route   DELETE /api/reviews/:id
+/**
+ * @desc    Delete a review (only by the original author)
+ * @route   DELETE /api/reviews/:id
+ * @access  Private
+ *
+ * After deletion, recalculates the doctor's aggregate rating.
+ */
 const deleteReview = async (req, res, next) => {
   try {
     const review = await Review.findById(req.params.id);
@@ -139,6 +168,7 @@ const deleteReview = async (req, res, next) => {
       throw new Error('Review not found');
     }
 
+    // Authorization check
     if (review.user.toString() !== req.user._id.toString()) {
       res.status(403);
       throw new Error('Unauthorized');
@@ -147,7 +177,7 @@ const deleteReview = async (req, res, next) => {
     const doctorId = review.doctor;
     await review.deleteOne();
 
-    // Recalculate ratings
+    // Recalculate ratings after deletion
     const allReviews = await Review.find({ doctor: doctorId });
     const count = allReviews.length;
     const avg = count > 0 ? (allReviews.reduce((acc, item) => item.rating + acc, 0) / count) : 0;

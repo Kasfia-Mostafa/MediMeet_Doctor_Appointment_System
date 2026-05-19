@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/immutability */
 import { useState, useEffect, useRef } from 'react';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
 import {
   HiOutlineDocumentText, HiOutlineTrash, HiOutlinePlus,
-  HiOutlinePhotograph, HiOutlineEye, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlinePencil
+  HiOutlinePhotograph, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlinePencil
 } from 'react-icons/hi';
 
 export default function AdminBlog() {
@@ -70,7 +72,7 @@ export default function AdminBlog() {
     try {
       const action = editingId ? 'Updating' : 'Publishing';
       toast.loading(`${action} blog...`, { id: 'blog-post' });
-      
+
       if (editingId) {
         await API.put(`/admin/blogs/${editingId}`, formData);
         toast.success('Blog updated successfully!', { id: 'blog-post' });
@@ -140,46 +142,46 @@ export default function AdminBlog() {
           zIndex: 9999,
           animation: 'fadeIn 0.2s ease-out'
         }}>
-          <div className="card" style={{ 
-            width: '100%', 
-            maxWidth: '400px', 
+          <div className="card" style={{
+            width: '100%',
+            maxWidth: '400px',
             padding: '32px',
             animation: 'slideUp 0.3s ease-out',
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
           }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
-              <div style={{ 
-                width: '64px', height: '64px', 
-                backgroundColor: 'rgba(var(--error-rgb, 220, 53, 69), 0.1)', 
-                borderRadius: '50%', 
+              <div style={{
+                width: '64px', height: '64px',
+                backgroundColor: 'rgba(var(--error-rgb, 220, 53, 69), 0.1)',
+                borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: 'var(--error)'
               }}>
                 <HiOutlineTrash style={{ fontSize: '32px' }} />
               </div>
             </div>
-            
+
             <h3 style={{ textAlign: 'center', marginBottom: '12px', color: 'var(--text-primary)' }}>Remove Article?</h3>
             <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: '32px', lineHeight: '1.5' }}>
               Are you sure you want to permanently remove this article? This action cannot be undone.
             </p>
-            
+
             <div className="flex gap-md">
-              <button 
-                className="btn btn-secondary" 
+              <button
+                className="btn btn-secondary"
                 style={{ flex: 1, padding: '12px' }}
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isDeleting}
               >
                 Cancel
               </button>
-              <button 
-                className="btn" 
-                style={{ 
-                  flex: 1, 
-                  padding: '12px', 
-                  backgroundColor: 'var(--error)', 
-                  color: 'white', 
+              <button
+                className="btn"
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  backgroundColor: 'var(--error)',
+                  color: 'white',
                   border: 'none',
                   display: 'flex',
                   alignItems: 'center',

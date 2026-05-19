@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import { useAuth } from '../../hooks/useAuth';
@@ -47,9 +48,9 @@ export default function DoctorSchedule() {
         if (meData?.doctorProfile) {
           setAvailableDays(meData.doctorProfile.availableDays || []);
           setTimeSlots(meData.doctorProfile.timeSlots || []);
-          setNewSlot(prev => ({ 
-            ...prev, 
-            day: meData.doctorProfile.availableDays?.[0] || prev.day 
+          setNewSlot(prev => ({
+            ...prev,
+            day: meData.doctorProfile.availableDays?.[0] || prev.day
           }));
         }
       })

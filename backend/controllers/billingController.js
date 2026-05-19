@@ -1,10 +1,24 @@
+/**
+ * ============================================================
+ * Billing Controller — Invoice & Payment Management
+ * ============================================================
+ * Handles billing operations: fetching bills (filtered by
+ * patient role), creating new bills, and marking bills as paid.
+ * ============================================================
+ */
+
 const Billing = require('../models/Billing');
 
-// @desc    Get bills
-// @route   GET /api/billing
+/**
+ * @desc    Get bills for the authenticated user (patients see only their own)
+ * @route   GET /api/billing
+ * @access  Private
+ */
 const getBills = async (req, res, next) => {
   try {
     const query = {};
+
+    // Patients only see their own bills; admins/doctors see all
     if (req.user.role === 'patient') query.patient = req.user._id;
     if (req.query.status) query.status = req.query.status;
 
@@ -22,8 +36,11 @@ const getBills = async (req, res, next) => {
   }
 };
 
-// @desc    Create bill
-// @route   POST /api/billing
+/**
+ * @desc    Create a new billing record
+ * @route   POST /api/billing
+ * @access  Private (Admin only)
+ */
 const createBill = async (req, res, next) => {
   try {
     const bill = await Billing.create(req.body);
@@ -33,8 +50,11 @@ const createBill = async (req, res, next) => {
   }
 };
 
-// @desc    Mark bill as paid
-// @route   PUT /api/billing/:id/pay
+/**
+ * @desc    Mark a bill as paid
+ * @route   PUT /api/billing/:id/pay
+ * @access  Private
+ */
 const payBill = async (req, res, next) => {
   try {
     const bill = await Billing.findById(req.params.id);
@@ -43,6 +63,7 @@ const payBill = async (req, res, next) => {
       throw new Error('Bill not found');
     }
 
+    // Update payment details
     bill.status = 'paid';
     bill.paymentMethod = req.body.paymentMethod || 'cash';
     bill.paidAt = new Date();

@@ -16,6 +16,7 @@ export default function PatientRecords() {
         const params = typeFilter !== 'all' ? { type: typeFilter } : {};
         const { data } = await API.get('/records', { params });
         setRecords(data || []);
+      // eslint-disable-next-line no-unused-vars
       } catch (err) {
         toast.error('Failed to fetch records');
       } finally { setLoading(false); }
@@ -35,6 +36,7 @@ export default function PatientRecords() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       // Fallback to opening in new tab if fetch fails (CORS)
       window.open(url, '_blank');

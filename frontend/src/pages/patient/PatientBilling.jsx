@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import API from '../../api/axios';
-import { HiOutlineCreditCard, HiOutlineReceiptTax, HiOutlineCurrencyDollar, HiOutlineDownload, HiOutlineInformationCircle } from 'react-icons/hi';
+import { HiOutlineCreditCard, HiOutlineCurrencyDollar, HiOutlineDownload } from 'react-icons/hi';
 import { toast } from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -22,7 +22,7 @@ export default function PatientBilling() {
   const handleDownloadInvoice = async (bill) => {
     setDownloading(bill._id);
     setActiveBill(bill);
-    
+
     // Wait for the hidden invoice to render
     setTimeout(async () => {
       try {
@@ -33,13 +33,13 @@ export default function PatientBilling() {
           logging: false,
           backgroundColor: '#ffffff'
         });
-        
+
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const imgProps = pdf.getImageProperties(imgData);
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        
+
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save(`MediMeet_Invoice_${bill.invoiceNumber}.pdf`);
         toast.success('Invoice downloaded successfully!');
@@ -106,8 +106,8 @@ export default function PatientBilling() {
                       </span>
                     </td>
                     <td style={{ padding: '16px 20px' }}>
-                      <button 
-                        className="btn btn-ghost btn-sm" 
+                      <button
+                        className="btn btn-ghost btn-sm"
                         onClick={() => handleDownloadInvoice(b)}
                         disabled={downloading === b._id}
                         style={{ color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '6px' }}
@@ -130,12 +130,12 @@ export default function PatientBilling() {
       {/* Hidden Invoice Template for PDF Generation */}
       {activeBill && (
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-          <div 
+          <div
             ref={invoiceRef}
-            style={{ 
-              width: '800px', 
-              padding: '60px', 
-              background: 'white', 
+            style={{
+              width: '800px',
+              padding: '60px',
+              background: 'white',
               fontFamily: '"Plus Jakarta Sans", sans-serif',
               color: '#1e1b4b',
               lineHeight: '1.6'
@@ -164,7 +164,7 @@ export default function PatientBilling() {
                 }
               `}
             </style>
-            
+
             {activeBill.status === 'paid' && <div className="paid-stamp">PAID</div>}
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '60px' }}>

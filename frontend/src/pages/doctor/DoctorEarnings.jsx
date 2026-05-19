@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
-import { HiOutlineCurrencyBangladeshi, HiOutlineCalendar, HiOutlineTrendingUp, HiOutlineCreditCard } from 'react-icons/hi';
+import { HiOutlineCurrencyBangladeshi, HiOutlineCreditCard } from 'react-icons/hi';
 
 export default function DoctorEarnings() {
   const [stats, setStats] = useState({
@@ -17,9 +17,9 @@ export default function DoctorEarnings() {
         const appointments = data.appointments || [];
         const paid = appointments.filter(a => a.paymentStatus === 'paid');
         const pending = appointments.filter(a => a.paymentStatus === 'pending' && ['confirmed', 'completed'].includes(a.status));
-        
+
         const total = paid.reduce((sum, a) => sum + (a.doctorProfile?.consultationFee || 0), 0);
-        
+
         setStats({
           totalEarnings: total,
           paidAppointments: paid.length,

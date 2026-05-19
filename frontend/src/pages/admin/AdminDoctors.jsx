@@ -1,8 +1,9 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
-import { HiOutlineSearch, HiOutlinePlus, HiOutlineUserGroup, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineTrash } from 'react-icons/hi';
+import { HiOutlineSearch, HiOutlinePlus, HiOutlineUserGroup, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi';
 
 export default function AdminDoctors() {
   const [doctors, setDoctors] = useState([]);

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api/axios';
@@ -6,7 +7,7 @@ import {
   HiOutlineUserAdd, HiOutlineMail, HiOutlineLockClosed, HiOutlinePhone,
   HiOutlineAcademicCap, HiOutlineBriefcase, HiOutlineCurrencyBangladeshi,
   HiOutlineStar, HiOutlineUser, HiOutlineBadgeCheck, HiOutlineCamera, HiOutlineStatusOnline,
-  HiOutlineClock, HiOutlineTrash, HiOutlineCalendar, HiOutlinePlus,
+  HiOutlineClock, HiOutlineCalendar,
   HiOutlineEye, HiOutlineEyeOff
 } from 'react-icons/hi';
 

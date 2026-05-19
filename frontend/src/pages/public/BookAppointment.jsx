@@ -197,10 +197,10 @@ export default function BookAppointment() {
 
   const handleBookClick = () => {
     console.log('[BookAppointment] handleBookClick', { consultationFee: doctorInfo?.consultationFee });
-    if (!user) { 
-      toast.error('Please sign in to book'); 
-      navigate('/signin', { state: { from: window.location.pathname + window.location.search } }); 
-      return; 
+    if (!user) {
+      toast.error('Please sign in to book');
+      navigate('/signin', { state: { from: window.location.pathname + window.location.search } });
+      return;
     }
 
     if (!doctorInfo?.consultationFee || doctorInfo.consultationFee === 0) {
@@ -296,7 +296,6 @@ export default function BookAppointment() {
                   ))}
                 </optgroup>
               )}
-              <option value="other">➕ Someone Else / New Member</option>
             </select>
 
             {(form.familyMember === ' ' || (form.familyMember !== '' && !user?.familyMembers?.some(fm => fm.name === form.familyMember))) && (
@@ -320,13 +319,13 @@ export default function BookAppointment() {
           <div className="flex items-center justify-between mb-sm">
             <label className="ba-field-label" style={{ margin: 0 }}>Available Time Slots</label>
             {form.timeSlot && (
-              <div className="fade-in" style={{ 
-                fontSize: '14px', 
-                color: 'var(--primary)', 
-                fontWeight: 600, 
-                backgroundColor: 'rgba(var(--primary-rgb, 83, 43, 136), 0.1)', 
-                padding: '4px 12px', 
-                borderRadius: '20px' 
+              <div className="fade-in" style={{
+                fontSize: '14px',
+                color: 'var(--primary)',
+                fontWeight: 600,
+                backgroundColor: 'rgba(var(--primary-rgb, 83, 43, 136), 0.1)',
+                padding: '4px 12px',
+                borderRadius: '20px'
               }}>
                 Selected: {formatTime12h(form.timeSlot)}
               </div>
@@ -339,8 +338,8 @@ export default function BookAppointment() {
               const isSelected = form.timeSlot === s;
 
               return (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   key={s}
                   className={`ba-slot ${isSelected ? 'selected' : ''} ${isBooked ? 'booked' : ''}`}
                   disabled={isBooked}

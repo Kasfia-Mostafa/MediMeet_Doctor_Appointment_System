@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
 import { useAuth } from '../../hooks/useAuth';
-import { HiOutlineCalendar, HiOutlineDocumentText, HiOutlineCreditCard, HiOutlineHeart, HiOutlineArrowRight } from 'react-icons/hi';
+import { HiOutlineCalendar, HiOutlineDocumentText, HiOutlineHeart, HiOutlineArrowRight } from 'react-icons/hi';
 
 export default function PatientDashboard() {
   const { user } = useAuth();
@@ -29,14 +29,14 @@ export default function PatientDashboard() {
           score = Math.round((s + w + sl) / 3);
         }
 
-        setStats({ 
-          appointments: apptRes.data.total || 0, 
-          records: (recRes.data || []).length, 
+        setStats({
+          appointments: apptRes.data.total || 0,
+          records: (recRes.data || []).length,
           wellnessScore: score,
           upcoming,
           vitals: wellnessRes?.data?.metrics || {}
         });
-      } catch { }
+      } catch { /* empty */ }
       finally { setLoading(false); }
     };
     fetch();
@@ -72,7 +72,7 @@ export default function PatientDashboard() {
           <div className="stat-icon stat-icon-success"><HiOutlineHeart /></div>
           <div>
             <div className="stat-value">{stats.wellnessScore}%</div>
-            <div className="stat-label">Wellness Score</div>
+            <div className="stat-label">Today's Wellness Score</div>
           </div>
         </div>
       </div>

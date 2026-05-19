@@ -43,8 +43,8 @@ const steps = [
 ];
 
 const testimonials = [
-  { name: 'Sarah Johnson', role: 'Patient', text: 'MediMeet made it incredibly easy to find a specialist near me. The booking process was seamless and I got an appointment within hours!', rating: 5 },
-  { name: 'Michael Chen', role: 'Patient', text: 'I love how I can manage all my medical records in one place. The dashboard is intuitive and the doctors are truly professional.', rating: 5 },
+  { name: 'Anwar Ahmed', role: 'Patient', text: 'MediMeet made it incredibly easy to find a specialist near me. The booking process was seamless and I got an appointment within hours!', rating: 5 },
+  { name: 'Safin Uddin', role: 'Patient', text: 'I love how I can manage all my medical records in one place. The dashboard is intuitive and the doctors are truly professional.', rating: 5 },
   { name: 'Fatima Rahman', role: 'Patient', text: 'As a busy professional, being able to book appointments online is a game-changer. The automated reminders ensure I never miss one.', rating: 5 },
 ];
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../../api/axios';
 import { useAuth } from '../../hooks/useAuth';
-import { HiOutlineStar, HiOutlineChatAlt2, HiOutlineUserCircle } from 'react-icons/hi';
+import { HiOutlineStar, HiOutlineChatAlt2 } from 'react-icons/hi';
 
 export default function DoctorReviews() {
   const { doctorProfile } = useAuth();

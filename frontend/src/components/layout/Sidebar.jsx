@@ -1,22 +1,42 @@
+/* eslint-disable no-unused-vars */
+/**
+ * ============================================================
+ * Sidebar Component — Dashboard Navigation Sidebar
+ * ============================================================
+ * Renders a role-specific sidebar navigation for the dashboard.
+ *
+ * Navigation sections by role:
+ *  - Admin:   Main Menu, Medical Management, System Operations
+ *  - Doctor:  Clinical Menu, Performance & Growth
+ *  - Patient: My Health, Care & Wellness, Financials
+ *
+ * Features:
+ *  - Active link highlighting via NavLink
+ *  - Section labels with uppercase styling
+ *  - Profile link in the sidebar footer with user avatar
+ * ============================================================
+ */
+
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
   HiOutlineViewGrid, HiOutlineCalendar, HiOutlineDocumentText, HiOutlineCreditCard,
-  HiOutlineHeart, HiOutlineUsers, HiOutlineCog, HiOutlineClipboardList,
-  HiOutlineClock, HiOutlineUserGroup, HiOutlineChartBar, HiOutlineCube,
-  HiOutlineLogout, HiOutlineBriefcase, HiOutlineAdjustments, HiOutlineChatAlt2,
-  HiOutlineUserCircle, HiOutlineCurrencyBangladeshi
+  HiOutlineHeart, HiOutlineUsers, HiOutlineClipboardList,
+  HiOutlineClock, HiOutlineUserGroup, HiOutlineChartBar, HiOutlineAdjustments, HiOutlineChatAlt2, HiOutlineCurrencyBangladeshi,
+  HiOutlineBriefcase
 } from 'react-icons/hi';
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  /** Handles logout and redirects to sign-in page */
   const handleLogout = async () => {
     await logout();
     navigate('/signin');
   };
 
+  // ── Admin Navigation Sections ────────────────────────────
   const adminSections = [
     {
       label: 'Main Menu',
@@ -44,6 +64,7 @@ export default function Sidebar() {
     }
   ];
 
+  // ── Doctor Navigation Sections ───────────────────────────
   const doctorSections = [
     {
       label: 'Clinical Menu',
@@ -63,6 +84,7 @@ export default function Sidebar() {
     }
   ];
 
+  // ── Patient Navigation Sections ──────────────────────────
   const patientSections = [
     {
       label: 'My Health',
@@ -87,66 +109,42 @@ export default function Sidebar() {
     }
   ];
 
+  /**
+   * Renders a list of sidebar sections based on the user's role.
+   * Each section has a label header and a list of NavLink items.
+   */
+  const renderSections = (sections) => sections.map((section, sIdx) => (
+    <div key={sIdx} className="sidebar-section" style={{ marginBottom: '24px' }}>
+      {/* Section label */}
+      <div className="sidebar-label" style={{
+        fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)',
+        textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', paddingLeft: '16px'
+      }}>
+        {section.label}
+      </div>
+      {/* Navigation links for this section */}
+      {section.links.map(link => (
+        <NavLink key={link.to} to={link.to} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+          {link.icon}
+          <span>{link.label}</span>
+        </NavLink>
+      ))}
+    </div>
+  ));
 
   return (
     <aside className="sidebar">
-
-
+      {/* Scrollable navigation area */}
       <div className="sidebar-scroll" style={{ flex: 1, overflowY: 'auto' }}>
-        {user?.role === 'admin' ? (
-          adminSections.map((section, sIdx) => (
-            <div key={sIdx} className="sidebar-section" style={{ marginBottom: '24px' }}>
-              <div className="sidebar-label" style={{
-                fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)',
-                textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', paddingLeft: '16px'
-              }}>
-                {section.label}
-              </div>
-              {section.links.map(link => (
-                <NavLink key={link.to} to={link.to} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-                  {link.icon}
-                  <span>{link.label}</span>
-                </NavLink>
-              ))}
-            </div>
-          ))
-        ) : user?.role === 'doctor' ? (
-          doctorSections.map((section, sIdx) => (
-            <div key={sIdx} className="sidebar-section" style={{ marginBottom: '24px' }}>
-              <div className="sidebar-label" style={{
-                fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)',
-                textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', paddingLeft: '16px'
-              }}>
-                {section.label}
-              </div>
-              {section.links.map(link => (
-                <NavLink key={link.to} to={link.to} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-                  {link.icon}
-                  <span>{link.label}</span>
-                </NavLink>
-              ))}
-            </div>
-          ))
-        ) : (
-          patientSections.map((section, sIdx) => (
-            <div key={sIdx} className="sidebar-section" style={{ marginBottom: '24px' }}>
-              <div className="sidebar-label" style={{
-                fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)',
-                textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', paddingLeft: '16px'
-              }}>
-                {section.label}
-              </div>
-              {section.links.map(link => (
-                <NavLink key={link.to} to={link.to} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
-                  {link.icon}
-                  <span>{link.label}</span>
-                </NavLink>
-              ))}
-            </div>
-          ))
-        )}
+        {user?.role === 'admin'
+          ? renderSections(adminSections)
+          : user?.role === 'doctor'
+          ? renderSections(doctorSections)
+          : renderSections(patientSections)
+        }
       </div>
 
+      {/* Sidebar Footer — Profile link with avatar */}
       <div className="sidebar-footer" style={{ marginTop: 'auto', borderTop: '1px solid var(--outline-variant)', paddingTop: '12px' }}>
         <Link
           to={user?.role === 'admin' ? '/admin/adminprofile' : (user?.role === 'doctor' ? '/doctor/doctorprofile' : '/patient/patientprofile')}

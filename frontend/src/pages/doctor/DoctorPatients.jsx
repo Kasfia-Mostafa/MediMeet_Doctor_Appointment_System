@@ -44,7 +44,9 @@ export default function DoctorPatients() {
           {filteredPatients.map((p) => (
             <Link to={`/doctor/patients/${p.patient._id}`} key={p.patient._id} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
               <div className="flex items-center gap-md mb-md">
-                <div className="avatar avatar-lg">{p.patient?.name?.charAt(0)}</div>
+                <div className="avatar avatar-lg">
+                  {p.patient?.avatar ? <img src={p.patient.avatar} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : p.patient?.name?.charAt(0)}
+                </div>
                 <div>
                   <h4 style={{ fontSize: '16px', marginBottom: '4px' }}>{p.patient?.name}</h4>
                   <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{p.patient?.email}</p>
