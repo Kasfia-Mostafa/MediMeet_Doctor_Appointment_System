@@ -12,6 +12,38 @@ MediMeet is a comprehensive Healthcare Platform built with the MERN stack. It fe
 - **Backend:** Node.js, Express, MongoDB (Mongoose), JSON Web Tokens (JWT), bcryptjs
 - **Services:** Cloudinary (Image storage), Stripe (Payments), Nodemailer (Emails), Node-cron (Scheduled tasks)
 
+## ✨ Key Features & Modules
+
+### 👤 Patient (User) Features
+- **Appointment Booking:** Search for doctors, view schedules, and book appointments easily.
+- **Medical Records:** Securely view and manage personal medical history, prescriptions, and test results.
+- **Billing & Payments:** Seamlessly pay for appointments using Stripe integration and view billing history.
+- **Health & Wellness:** Access wellness tips, blogs, and maintain personal health tracking.
+- **Reviews:** Leave ratings and feedback for doctors post-appointment.
+
+### 👨‍⚕️ Doctor Features
+- **Schedule Management:** Set available slots and manage upcoming patient appointments.
+- **Patient Management:** Access assigned patients' medical records to provide accurate diagnoses and prescriptions.
+- **Profile Management:** Update specialty, qualifications, availability, and consultation fees.
+- **Blogging:** Publish health-related articles and wellness tips to educate patients.
+
+### 🛡️ Admin Features
+- **Platform Management:** Full oversight over all users, doctors, and appointments on the platform.
+- **Inventory & Billing:** Track system inventory, oversee global billing, and monitor platform revenue.
+- **Verification:** Approve or reject doctor applications to ensure quality of care.
+- **Analytics:** Access dashboards to view platform statistics and usage metrics.
+
+## 🗄️ Database Models
+The platform leverages MongoDB with the following core schemas:
+- `User` & `Doctor` (Authentication, profiles, roles)
+- `Appointment` (Scheduling, status tracking)
+- `MedicalRecord` (Diagnoses, prescriptions)
+- `Billing` (Invoices, payment status)
+- `Blog` & `Wellness` (Content management)
+- `Review` (Feedback system)
+- `Inventory` (System assets tracking)
+- `Contact` (Support inquiries)
+
 ## 📁 Folder Structure
 ```text
 f:\Web Projects\MediMeet\
