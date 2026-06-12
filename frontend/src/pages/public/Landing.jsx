@@ -366,24 +366,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══════════════ CTA ═══════════════ */}
-      <section className="cta-section">
-        <div className="container">
-          <div className="cta-card reveal">
-            <div className="cta-bg-pattern"></div>
-            <div className="cta-content">
-              <h2>Ready to take control of your health?</h2>
-              <p>Join thousands of patients who trust MediMeet for their healthcare needs. Sign up today and experience the future of medical care.</p>
-              <div className="cta-actions">
-                <Link to="/signup" className="btn-cta-primary">
-                  Create Free Account <HiOutlineArrowRight />
-                </Link>
-                <Link to="/contact" className="btn-cta-secondary">Contact Support</Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+   
     </div>
   );
 }

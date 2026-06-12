@@ -4,16 +4,16 @@
  * ============================================================
  * Defines the complete route structure for MediMeet. Routes
  * are organized into four categories:
- * 
+ *
  *  1. Public Routes  — Landing, auth pages, doctor search, blog
  *  2. Patient Routes — Dashboard, appointments, records, billing, wellness
  *  3. Doctor Routes  — Dashboard, patients, schedule, earnings, reviews
  *  4. Admin Routes   — Dashboard, user/doctor management, analytics, articles
- * 
+ *
  * Route protection:
  *  - ProtectedRoute: Requires any authenticated user
  *  - RoleRoute: Requires specific role (patient/doctor/admin)
- * 
+ *
  * Layout wrappers:
  *  - PublicLayout: Navbar + Footer for public pages
  *  - DashboardLayout: Navbar + Sidebar for authenticated dashboards
@@ -63,7 +63,6 @@ import DoctorAppointments from './pages/doctor/DoctorAppointments';
 
 // ── Admin Dashboard Pages ──────────────────────────────────
 import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminStaff from './pages/admin/AdminStaff';
 import AdminBlog from './pages/admin/AdminBlog';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
 import AdminSettings from './pages/admin/AdminSettings';
@@ -138,7 +137,6 @@ function App() {
         {/* ── Admin Routes (role: admin) ────────────────── */}
         <Route path="/admin" element={<RoleRoute roles={['admin']}><DashboardLayout /></RoleRoute>}>
           <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="users" element={<AdminStaff />} />
           <Route path="doctors" element={<AdminDoctors />} />
           <Route path="doctors/:id" element={<DoctorDetail />} />
           <Route path="appointments" element={<AdminAppointments />} />
