@@ -70,15 +70,22 @@ app.use(errorHandler);
  * 2. Listening on the configured PORT
  * 3. Starting the appointment expiry cron job
  */
-const start = async () => {
-  try {
-    await connectDB();
-    const PORT = process.env.PORT || 5001;
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-    scheduleExpiryCheck(); // Start the background job
-  } catch (error) {
-    console.error(`Failed to start server: ${error.message}`);
-  }
-};
+if (process.env.NODE_ENV !== 'production') {
+  const start = async () => {
+    try {
+      await connectDB();
+      const PORT = process.env.PORT || 5001;
+      app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+      scheduleExpiryCheck(); // Start the background job
+    } catch (error) {
+      console.error(`Failed to start server: ${error.message}`);
+    }
+  };
+  start();
+}
 
-start();
+// Export the app for Vercel serverless deployment
+module.exports = async (req, res) => {
+  await connectDB(); // Ensure DB is connected before handling the request
+  return app(req, res);
+};
