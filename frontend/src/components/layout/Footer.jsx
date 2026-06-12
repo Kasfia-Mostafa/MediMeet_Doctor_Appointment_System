@@ -13,6 +13,7 @@
  */
 
 import { Link } from 'react-router-dom';
+import Logo from '../../assets/MediMeet-Logo.png';
 
 export default function Footer() {
   return (
@@ -22,7 +23,7 @@ export default function Footer() {
           {/* Column 1: Brand & Description */}
           <div>
             <Link to="/" className="navbar-brand" style={{ marginBottom: '16px', display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-              <img src="/src/assets/MediMeet-Logo.png" alt="MediMeet Logo" style={{ height: '32px', width: 'auto' }} />
+              <img src={Logo} alt="MediMeet Logo" style={{ height: '32px', width: 'auto' }} />
               <span className="brand-text-gradient" style={{ fontSize: '24px' }}>MediMeet</span>
             </Link>
             <p>Modern healthcare management platform. Book appointments, manage records, and connect with top doctors — all in one place.</p>

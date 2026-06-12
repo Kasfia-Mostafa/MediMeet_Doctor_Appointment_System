@@ -16,6 +16,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { HiOutlineMenu, HiX, HiOutlineLogout } from 'react-icons/hi';
 import { useState, useEffect } from 'react';
+import Logo from '../../assets/MediMeet-Logo.png';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -49,7 +50,7 @@ export default function Navbar() {
       <div className="container">
         {/* Brand Logo */}
         <Link to="/" className="navbar-brand" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/src/assets/MediMeet-Logo.png" alt="MediMeet Logo" style={{ height: '32px', width: 'auto' }} />
+          <img src={Logo} alt="MediMeet Logo" style={{ height: '32px', width: 'auto' }} />
           <span className="brand-text-gradient" style={{ fontSize: '24px' }}>MediMeet</span>
         </Link>
 
